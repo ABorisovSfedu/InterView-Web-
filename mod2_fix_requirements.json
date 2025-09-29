@@ -1,0 +1,130 @@
+{
+  "mod2_fix_requirements": "critical_issue_identified",
+  "timestamp": "2025-09-27T23:10:00Z",
+  "problem_summary": "Mod2 возвращает одинаковый layout для всех сессий независимо от транскрипции",
+  "root_cause": "Mod2 не получает данные от Mod1 из-за отключенного ingest",
+  "current_behavior": {
+    "mod1_to_mod2_data_flow": "❌ ОТКЛЮЧЕН",
+    "mod2_ingest_status": "❌ Временно отключен из-за проблем с подписью",
+    "mod2_layout_generation": "❌ Возвращает дефолтный layout для всех сессий",
+    "user_experience": "❌ Одинаковые результаты независимо от речи"
+  },
+  "technical_analysis": {
+    "code_location": "SessionPage.tsx lines 218-219",
+    "disabled_code": "// await mod2Client.ingestFull(finalResult); // Временно отключено",
+    "reason": "Проблемы с подписью в Mod2 ingest endpoints",
+    "impact": "Mod2 не получает транскрипцию и генерирует дефолтный layout"
+  },
+  "mod2_issues_to_fix": [
+    {
+      "issue": "1. Проблема с подписью в ingest endpoints",
+      "endpoints_affected": [
+        "POST /v2/ingest/chunk",
+        "POST /v2/ingest/full"
+      ],
+      "required_headers": [
+        "X-Signature",
+        "Idempotency-Key", 
+        "X-Request-Id"
+      ],
+      "current_status": "❌ Возвращает 'Bad signature'",
+      "fix_required": "Настроить правильную подпись или отключить проверку подписи"
+    },
+    {
+      "issue": "2. Mod2 не обрабатывает реальные данные",
+      "current_behavior": "Возвращает дефолтный layout для любой сессии",
+      "expected_behavior": "Анализировать транскрипцию и генерировать соответствующий layout",
+      "fix_required": "Включить обработку реальных данных от Mod1"
+    },
+    {
+      "issue": "3. Отсутствие связи Mod1 → Mod2",
+      "data_flow": "Mod1 транскрипция → Mod2 ingest → Mod2 layout",
+      "current_status": "❌ Разорвана на этапе ingest",
+      "fix_required": "Восстановить передачу данных от Mod1 к Mod2"
+    }
+  ],
+  "specific_fixes_needed": [
+    {
+      "fix": "1. Исправить подпись в Mod2",
+      "options": [
+        {
+          "option": "A. Настроить правильную подпись",
+          "description": "Найти правильный алгоритм подписи для Mod2",
+          "effort": "Высокий",
+          "risk": "Средний"
+        },
+        {
+          "option": "B. Отключить проверку подписи",
+          "description": "Временно отключить проверку подписи в Mod2",
+          "effort": "Низкий", 
+          "risk": "Низкий"
+        },
+        {
+          "option": "C. Использовать тестовую подпись",
+          "description": "Настроить Mod2 на принятие тестовой подписи",
+          "effort": "Средний",
+          "risk": "Низкий"
+        }
+      ]
+    },
+    {
+      "fix": "2. Включить ingest в SessionPage.tsx",
+      "code_changes": [
+        "Раскомментировать: await mod2Client.ingestFull(finalResult)",
+        "Раскомментировать: await mod2Client.ingestChunk(chunk)",
+        "Убрать предупреждения о временном отключении"
+      ],
+      "location": "SessionPage.tsx lines 183, 218"
+    },
+    {
+      "fix": "3. Проверить обработку данных в Mod2",
+      "verification_steps": [
+        "Отправить тестовые данные в Mod2 ingest",
+        "Проверить, что Mod2 сохраняет данные",
+        "Проверить, что layout зависит от содержимого",
+        "Протестировать с разными транскрипциями"
+      ]
+    }
+  ],
+  "testing_plan": [
+    {
+      "step": "1. Исправить подпись в Mod2",
+      "test": "Отправить тестовый запрос в /v2/ingest/full",
+      "expected": "200 OK вместо 'Bad signature'"
+    },
+    {
+      "step": "2. Включить ingest в коде",
+      "test": "Записать аудио и проверить логи",
+      "expected": "Данные отправляются в Mod2"
+    },
+    {
+      "step": "3. Проверить layout генерацию",
+      "test": "Записать разные фразы",
+      "expected": "Разные layouts для разных транскрипций"
+    }
+  ],
+  "immediate_action_required": {
+    "priority": "HIGH",
+    "action": "Исправить подпись в Mod2 ingest endpoints",
+    "reason": "Без этого Mod2 не может получать реальные данные",
+    "impact": "Пользователь получает некорректные результаты"
+  },
+  "workaround_options": [
+    {
+      "option": "Временное решение",
+      "description": "Показать предупреждение пользователю о том, что Mod2 работает в тестовом режиме",
+      "implementation": "Добавить уведомление в UI",
+      "effectiveness": "Средняя - пользователь понимает ограничения"
+    },
+    {
+      "option": "Полное решение", 
+      "description": "Исправить подпись и включить реальную обработку",
+      "implementation": "Настройка Mod2 + включение ingest",
+      "effectiveness": "Высокая - полная функциональность"
+    }
+  ],
+  "status": "❌ КРИТИЧЕСКАЯ ПРОБЛЕМА - Mod2 не обрабатывает реальные данные"
+}
+
+
+

@@ -1,0 +1,656 @@
+{
+  "vocab_version": "2.0.0",
+  "terms_count": 50,
+  "terms": [
+    {
+      "term": "кнопка",
+      "description": "Элемент интерфейса для выполнения действий",
+      "synonyms": ["button", "кнопочка", "нажать", "клик", "нажатие"],
+      "components": [
+        {
+          "component": "ui.button",
+          "component_type": "ui.button",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "форма",
+      "description": "Элемент для ввода данных",
+      "synonyms": ["form", "формочка", "ввод", "заполнить", "анкета"],
+      "components": [
+        {
+          "component": "ui.form",
+          "component_type": "ui.form",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "обратная связь",
+      "description": "Форма для связи с пользователями",
+      "synonyms": ["contact", "связь", "контакт", "feedback", "сообщение", "письмо"],
+      "components": [
+        {
+          "component": "ui.contact-form",
+          "component_type": "ui.contact-form",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "услуги",
+      "description": "Список предоставляемых услуг",
+      "synonyms": ["services", "сервисы", "предложения", "что мы делаем"],
+      "components": [
+        {
+          "component": "ui.services-grid",
+          "component_type": "ui.services-grid",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "заголовок",
+      "description": "Основной заголовок страницы",
+      "synonyms": ["title", "заголовок", "название", "h1", "главный заголовок"],
+      "components": [
+        {
+          "component": "ui.heading",
+          "component_type": "ui.heading",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "текст",
+      "description": "Обычный текстовый блок",
+      "synonyms": ["text", "параграф", "описание", "содержание", "абзац"],
+      "components": [
+        {
+          "component": "ui.paragraph",
+          "component_type": "ui.paragraph",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "изображение",
+      "description": "Графический элемент",
+      "synonyms": ["image", "картинка", "фото", "иллюстрация", "рисунок"],
+      "components": [
+        {
+          "component": "ui.image",
+          "component_type": "ui.image",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "навигация",
+      "description": "Меню навигации по сайту",
+      "synonyms": ["navigation", "меню", "навигация", "ссылки", "menu"],
+      "components": [
+        {
+          "component": "ui.navbar",
+          "component_type": "ui.navbar",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "подвал",
+      "description": "Нижняя часть страницы",
+      "synonyms": ["footer", "подвал", "низ", "футер", "конец страницы"],
+      "components": [
+        {
+          "component": "ui.footer",
+          "component_type": "ui.footer",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "герой",
+      "description": "Главная секция с призывом к действию",
+      "synonyms": ["hero", "главная", "баннер", "приветствие", "обложка"],
+      "components": [
+        {
+          "component": "ui.hero",
+          "component_type": "ui.hero",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "карточка",
+      "description": "Блок с информацией",
+      "synonyms": ["card", "карточка", "блок", "панель", "контейнер"],
+      "components": [
+        {
+          "component": "ui.card",
+          "component_type": "ui.card",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "список",
+      "description": "Перечень элементов",
+      "synonyms": ["list", "список", "перечень", "элементы", "пункты"],
+      "components": [
+        {
+          "component": "ui.list",
+          "component_type": "ui.list",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "поле ввода",
+      "description": "Поле для ввода текста",
+      "synonyms": ["input", "поле", "ввод", "текстовое поле", "строка ввода"],
+      "components": [
+        {
+          "component": "ui.input",
+          "component_type": "ui.input",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "текстовая область",
+      "description": "Многострочное поле ввода",
+      "synonyms": ["textarea", "текстовая область", "большое поле", "сообщение"],
+      "components": [
+        {
+          "component": "ui.textarea",
+          "component_type": "ui.textarea",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "выпадающий список",
+      "description": "Список для выбора опций",
+      "synonyms": ["select", "выбор", "список", "опции", "dropdown"],
+      "components": [
+        {
+          "component": "ui.select",
+          "component_type": "ui.select",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "чекбокс",
+      "description": "Флажок для выбора",
+      "synonyms": ["checkbox", "галочка", "флажок", "отметка", "выбор"],
+      "components": [
+        {
+          "component": "ui.checkbox",
+          "component_type": "ui.checkbox",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "радиокнопка",
+      "description": "Переключатель для выбора одной опции",
+      "synonyms": ["radio", "радио", "переключатель", "один из", "выбор"],
+      "components": [
+        {
+          "component": "ui.radio",
+          "component_type": "ui.radio",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "метка",
+      "description": "Подпись для поля ввода",
+      "synonyms": ["label", "метка", "подпись", "название поля", "описание"],
+      "components": [
+        {
+          "component": "ui.label",
+          "component_type": "ui.label",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "бейдж",
+      "description": "Маленький значок с текстом",
+      "synonyms": ["badge", "значок", "метка", "тег", "маркер"],
+      "components": [
+        {
+          "component": "ui.badge",
+          "component_type": "ui.badge",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "сетка",
+      "description": "Сетка для размещения элементов",
+      "synonyms": ["grid", "сетка", "таблица", "раскладка", "колонки"],
+      "components": [
+        {
+          "component": "ui.grid",
+          "component_type": "ui.grid",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "флекс",
+      "description": "Гибкая раскладка элементов",
+      "synonyms": ["flex", "флекс", "ряд", "строка", "горизонтально"],
+      "components": [
+        {
+          "component": "ui.flex",
+          "component_type": "ui.flex",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "контейнер",
+      "description": "Контейнер для содержимого",
+      "synonyms": ["container", "контейнер", "обертка", "блок", "секция"],
+      "components": [
+        {
+          "component": "ui.container",
+          "component_type": "ui.container",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "секция",
+      "description": "Раздел страницы",
+      "synonyms": ["section", "секция", "раздел", "блок", "часть"],
+      "components": [
+        {
+          "component": "ui.section",
+          "component_type": "ui.section",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "иконка",
+      "description": "Графический символ",
+      "synonyms": ["icon", "иконка", "символ", "значок", "пиктограмма"],
+      "components": [
+        {
+          "component": "ui.icon",
+          "component_type": "ui.icon",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "видео",
+      "description": "Видео контент",
+      "synonyms": ["video", "видео", "ролик", "фильм", "клип"],
+      "components": [
+        {
+          "component": "ui.video",
+          "component_type": "ui.video",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "хлебные крошки",
+      "description": "Навигационная цепочка",
+      "synonyms": ["breadcrumb", "крошки", "навигация", "путь", "цепочка"],
+      "components": [
+        {
+          "component": "ui.breadcrumb",
+          "component_type": "ui.breadcrumb",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "отзыв",
+      "description": "Отзыв клиента",
+      "synonyms": ["testimonial", "отзыв", "рекомендация", "мнение", "отклик"],
+      "components": [
+        {
+          "component": "ui.testimonial",
+          "component_type": "ui.testimonial",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "цены",
+      "description": "Таблица с ценами",
+      "synonyms": ["pricing", "цены", "тарифы", "стоимость", "планы"],
+      "components": [
+        {
+          "component": "ui.pricing",
+          "component_type": "ui.pricing",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "галерея",
+      "description": "Коллекция изображений",
+      "synonyms": ["gallery", "галерея", "фотографии", "коллекция", "портфолио"],
+      "components": [
+        {
+          "component": "ui.gallery",
+          "component_type": "ui.gallery",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "слайдер",
+      "description": "Карусель изображений",
+      "synonyms": ["slider", "слайдер", "карусель", "прокрутка", "слайды"],
+      "components": [
+        {
+          "component": "ui.slider",
+          "component_type": "ui.slider",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "аккордеон",
+      "description": "Складывающиеся секции",
+      "synonyms": ["accordion", "аккордеон", "складывание", "раскрытие", "вкладки"],
+      "components": [
+        {
+          "component": "ui.accordion",
+          "component_type": "ui.accordion",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "табы",
+      "description": "Вкладки для переключения контента",
+      "synonyms": ["tabs", "табы", "вкладки", "переключение", "секции"],
+      "components": [
+        {
+          "component": "ui.tabs",
+          "component_type": "ui.tabs",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "модальное окно",
+      "description": "Всплывающее окно",
+      "synonyms": ["modal", "модалка", "окно", "диалог", "попап"],
+      "components": [
+        {
+          "component": "ui.modal",
+          "component_type": "ui.modal",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "уведомление",
+      "description": "Сообщение для пользователя",
+      "synonyms": ["alert", "уведомление", "сообщение", "предупреждение", "информация"],
+      "components": [
+        {
+          "component": "ui.alert",
+          "component_type": "ui.alert",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "прогресс",
+      "description": "Индикатор прогресса",
+      "synonyms": ["progress", "прогресс", "загрузка", "процесс", "статус"],
+      "components": [
+        {
+          "component": "ui.progress",
+          "component_type": "ui.progress",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "спиннер",
+      "description": "Индикатор загрузки",
+      "synonyms": ["spinner", "спиннер", "загрузка", "ожидание", "крутилка"],
+      "components": [
+        {
+          "component": "ui.spinner",
+          "component_type": "ui.spinner",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "таблица",
+      "description": "Таблица с данными",
+      "synonyms": ["table", "таблица", "данные", "список", "строки"],
+      "components": [
+        {
+          "component": "ui.table",
+          "component_type": "ui.table",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "календарь",
+      "description": "Календарь для выбора даты",
+      "synonyms": ["calendar", "календарь", "дата", "время", "расписание"],
+      "components": [
+        {
+          "component": "ui.calendar",
+          "component_type": "ui.calendar",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "поиск",
+      "description": "Поле поиска",
+      "synonyms": ["search", "поиск", "найти", "искать", "фильтр"],
+      "components": [
+        {
+          "component": "ui.search",
+          "component_type": "ui.search",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "фильтр",
+      "description": "Фильтр для данных",
+      "synonyms": ["filter", "фильтр", "сортировка", "отбор", "критерии"],
+      "components": [
+        {
+          "component": "ui.filter",
+          "component_type": "ui.filter",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "пагинация",
+      "description": "Навигация по страницам",
+      "synonyms": ["pagination", "пагинация", "страницы", "далее", "назад"],
+      "components": [
+        {
+          "component": "ui.pagination",
+          "component_type": "ui.pagination",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "сайдбар",
+      "description": "Боковая панель",
+      "synonyms": ["sidebar", "сайдбар", "боковая панель", "меню", "навигация"],
+      "components": [
+        {
+          "component": "ui.sidebar",
+          "component_type": "ui.sidebar",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "хедер",
+      "description": "Верхняя часть страницы",
+      "synonyms": ["header", "хедер", "шапка", "верх", "начало"],
+      "components": [
+        {
+          "component": "ui.header",
+          "component_type": "ui.header",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "меню",
+      "description": "Навигационное меню",
+      "synonyms": ["menu", "меню", "навигация", "ссылки", "пункты"],
+      "components": [
+        {
+          "component": "ui.menu",
+          "component_type": "ui.menu",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "дропдаун",
+      "description": "Выпадающее меню",
+      "synonyms": ["dropdown", "дропдаун", "выпадающее", "список", "опции"],
+      "components": [
+        {
+          "component": "ui.dropdown",
+          "component_type": "ui.dropdown",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "тултип",
+      "description": "Всплывающая подсказка",
+      "synonyms": ["tooltip", "тултип", "подсказка", "наведение", "помощь"],
+      "components": [
+        {
+          "component": "ui.tooltip",
+          "component_type": "ui.tooltip",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "попап",
+      "description": "Всплывающее окно",
+      "synonyms": ["popup", "попап", "всплывающее", "окно", "диалог"],
+      "components": [
+        {
+          "component": "ui.popup",
+          "component_type": "ui.popup",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "оверлей",
+      "description": "Наложение поверх контента",
+      "synonyms": ["overlay", "оверлей", "наложение", "поверх", "фон"],
+      "components": [
+        {
+          "component": "ui.overlay",
+          "component_type": "ui.overlay",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "спойлер",
+      "description": "Скрываемый контент",
+      "synonyms": ["spoiler", "спойлер", "скрыть", "показать", "раскрыть"],
+      "components": [
+        {
+          "component": "ui.spoiler",
+          "component_type": "ui.spoiler",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "тег",
+      "description": "Метка для категоризации",
+      "synonyms": ["tag", "тег", "метка", "категория", "классификация"],
+      "components": [
+        {
+          "component": "ui.tag",
+          "component_type": "ui.tag",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "чип",
+      "description": "Маленький элемент интерфейса",
+      "synonyms": ["chip", "чип", "элемент", "блок", "компонент"],
+      "components": [
+        {
+          "component": "ui.chip",
+          "component_type": "ui.chip",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "аватар",
+      "description": "Изображение пользователя",
+      "synonyms": ["avatar", "аватар", "фото", "пользователь", "профиль"],
+      "components": [
+        {
+          "component": "ui.avatar",
+          "component_type": "ui.avatar",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "рейтинг",
+      "description": "Система оценок",
+      "synonyms": ["rating", "рейтинг", "оценка", "звезды", "баллы"],
+      "components": [
+        {
+          "component": "ui.rating",
+          "component_type": "ui.rating",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "term": "счетчик",
+      "description": "Элемент для подсчета",
+      "synonyms": ["counter", "счетчик", "количество", "число", "подсчет"],
+      "components": [
+        {
+          "component": "ui.counter",
+          "component_type": "ui.counter",
+          "confidence": 1.0
+        }
+      ]
+    }
+  ]
+}
+
+

@@ -1,0 +1,32 @@
+{
+  "session_id": "session_demo_123",
+  "text_full": "Привет, это демонстрация работы модуля Mod1. Система успешно интегрирована и готова к обработке голосовых записей. Транскрипция работает корректно.",
+  "chunks": [
+    {
+      "session_id": "session_demo_123",
+      "chunk_id": "chunk_001",
+      "seq": 1,
+      "text": "Привет, это демонстрация работы модуля Mod1.",
+      "overlap_prefix": "",
+      "lang": "ru-RU"
+    },
+    {
+      "session_id": "session_demo_123",
+      "chunk_id": "chunk_002",
+      "seq": 2,
+      "text": "Система успешно интегрирована и готова к обработке голосовых записей.",
+      "overlap_prefix": "Система успешно интегрирована",
+      "lang": "ru-RU"
+    },
+    {
+      "session_id": "session_demo_123",
+      "chunk_id": "chunk_003",
+      "seq": 3,
+      "text": "Транскрипция работает корректно.",
+      "overlap_prefix": "Транскрипция работает",
+      "lang": "ru-RU"
+    }
+  ],
+  "duration_sec": 8.5,
+  "total_chunks": 3
+}

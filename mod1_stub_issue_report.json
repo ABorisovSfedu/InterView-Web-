@@ -1,0 +1,105 @@
+{
+  "mod1_stub_issue_report": "critical_problem_found",
+  "timestamp": "2025-09-27T21:50:00Z",
+  "problem_summary": "Mod1_v2 возвращает одинаковый транскрипт для всех аудио файлов",
+  "root_cause": "stub_asr: true в конфигурации Mod1",
+  "investigation_results": {
+    "config_check": {
+      "file": "/app/config.yaml",
+      "stub_asr": true,
+      "status": "Проблема найдена"
+    },
+    "environment_check": {
+      "STUB_ASR": "false",
+      "status": "Переменная установлена, но не работает"
+    },
+    "test_results": [
+      {
+        "test": "Синусоидальный тон 1000Hz",
+        "result": "Здравствуйте. Это тестовая запись...",
+        "expected": "Тишина или звуковой сигнал"
+      },
+      {
+        "test": "Голосовой синтез 'Новый тест для проверки'",
+        "result": "Здравствуйте. Это тестовая запись...",
+        "expected": "Новый тест для проверки реальной транскрипции"
+      },
+      {
+        "test": "Голосовой синтез 'Привет, это новая запись'",
+        "result": "Здравствуйте. Это тестовая запись...",
+        "expected": "Привет, это новая запись для тестирования"
+      }
+    ]
+  },
+  "technical_details": {
+    "mod1_container": "asr-chunker",
+    "mod1_image": "mod1_v2-app",
+    "config_location": "/app/config.yaml",
+    "config_content": {
+      "stub_asr": true,
+      "whisper": {
+        "model": "small",
+        "device": "cpu",
+        "language": "ru"
+      }
+    },
+    "attempted_fixes": [
+      "Изменение конфигурации через sed",
+      "Перезапуск контейнера",
+      "Установка переменной окружения STUB_ASR=false",
+      "Создание нового контейнера с правильной конфигурацией"
+    ]
+  },
+  "current_status": {
+    "mod1_health": "OK",
+    "mod1_responsive": true,
+    "stub_mode": "ACTIVE (несмотря на попытки отключения)",
+    "real_transcription": "НЕ РАБОТАЕТ"
+  },
+  "impact_on_system": {
+    "frontend_integration": "Работает корректно",
+    "api_calls": "Успешные",
+    "data_flow": "Корректный",
+    "user_experience": "ПОЛНОСТЬЮ СЛОМАН - показывает неверные результаты"
+  },
+  "proposed_solutions": [
+    {
+      "solution": "1. Полная переустановка Mod1",
+      "description": "Удалить текущий контейнер и создать новый с правильной конфигурацией",
+      "risk": "Средний",
+      "effort": "Высокий"
+    },
+    {
+      "solution": "2. Проверка исходного кода Mod1",
+      "description": "Найти, где именно используется stub_asr и как его правильно отключить",
+      "risk": "Низкий",
+      "effort": "Средний"
+    },
+    {
+      "solution": "3. Использование другого Mod1 образа",
+      "description": "Попробовать другой образ или версию Mod1",
+      "risk": "Средний",
+      "effort": "Средний"
+    },
+    {
+      "solution": "4. Временное решение с предупреждением",
+      "description": "Добавить предупреждение пользователю о том, что транскрипция работает в тестовом режиме",
+      "risk": "Низкий",
+      "effort": "Низкий"
+    }
+  },
+  "immediate_action_required": {
+    "priority": "CRITICAL",
+    "action": "Исправить Mod1 для реальной транскрипции",
+    "reason": "Система показывает неверные результаты пользователю",
+    "user_impact": "Полностью сломан пользовательский опыт"
+  },
+  "workaround_for_now": {
+    "description": "Добавить предупреждение в UI о том, что транскрипция работает в тестовом режиме",
+    "implementation": "Показать уведомление пользователю",
+    "code_location": "SessionPage.tsx"
+  }
+}
+
+
+

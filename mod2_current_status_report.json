@@ -1,0 +1,140 @@
+{
+  "mod2_current_status_report": "completed",
+  "timestamp": "2025-09-27T23:20:00Z",
+  "mod2_health_check": {
+    "status": "✅ OK",
+    "stanza_ready": true,
+    "model_warm": true,
+    "stream_preview": false
+  },
+  "mod2_ingest_test": {
+    "endpoint": "POST /v2/ingest/full",
+    "test_data": {
+      "session_id": "test_session_123",
+      "text_full": "Создай кнопку и форму",
+      "chunks": []
+    },
+    "headers_sent": [
+      "X-Signature: test-signature",
+      "Idempotency-Key: test-key",
+      "X-Request-Id: test-request"
+    ],
+    "response": "401 Unauthorized",
+    "error": "Bad signature",
+    "status": "❌ НЕ РАБОТАЕТ"
+  },
+  "mod2_layout_test": {
+    "endpoint": "GET /v2/session/test_session_123/layout",
+    "response": {
+      "status": "ok",
+      "session_id": "test_session_123",
+      "layout": {
+        "template": "hero-main-footer",
+        "sections": {
+          "hero": [{"component": "Hero"}],
+          "main": [{"component": "ui.button"}, {"component": "ui.form"}],
+          "footer": []
+        },
+        "count": 3
+      }
+    },
+    "status": "⚠️ ВОЗВРАЩАЕТ ДЕФОЛТНЫЙ LAYOUT"
+  },
+  "mod2_vocab_test": {
+    "endpoint": "GET /v2/vocab",
+    "response": {
+      "vocab_version": "0.1.1",
+      "terms": [
+        {
+          "lemma": "форма обратный связь",
+          "aliases": ["форма обратной связи", "обратная связь", "форма связи", "contact form"],
+          "element": "ContactForm"
+        },
+        {
+          "lemma": "каталог услуга", 
+          "aliases": ["каталог услуг", "каталог сервисов", "services catalog", "список услуг"],
+          "element": "ServicesGrid"
+        },
+        {
+          "lemma": "форма",
+          "aliases": ["form"],
+          "element": "ContactForm"
+        }
+      ]
+    },
+    "status": "✅ РАБОТАЕТ"
+  },
+  "mod2_logs_analysis": {
+    "recent_errors": [
+      "pydantic_core._pydantic_core.ValidationError: 1 validation error for MappingResult keyphrase Input should be a valid dictionary or instance of Keyphrase"
+    ],
+    "recent_requests": [
+      "GET /v2/session/session_1759000336504_11508o8i1/layout - 200 OK",
+      "GET /healthz - 200 OK", 
+      "POST /v2/ingest/full - 401 Unauthorized",
+      "GET /v2/session/test_session_123/layout - 200 OK",
+      "GET /v2/vocab - 200 OK"
+    ]
+  },
+  "problems_identified": [
+    {
+      "problem": "1. Ingest endpoints не работают",
+      "symptom": "401 Unauthorized - Bad signature",
+      "impact": "Mod2 не получает данные от Mod1",
+      "severity": "CRITICAL"
+    },
+    {
+      "problem": "2. Layout всегда одинаковый",
+      "symptom": "Возвращает hero-main-footer для любой сессии",
+      "impact": "Пользователь получает некорректные результаты",
+      "severity": "HIGH"
+    },
+    {
+      "problem": "3. Validation errors в логах",
+      "symptom": "pydantic_core.ValidationError для MappingResult",
+      "impact": "Возможные проблемы с обработкой данных",
+      "severity": "MEDIUM"
+    }
+  ],
+  "working_components": [
+    {
+      "component": "Health check",
+      "status": "✅ Работает",
+      "details": "Stanza модель загружена и готова"
+    },
+    {
+      "component": "Vocab endpoint", 
+      "status": "✅ Работает",
+      "details": "Возвращает словарь терминов с элементами"
+    },
+    {
+      "component": "Layout endpoint",
+      "status": "⚠️ Работает, но возвращает дефолт",
+      "details": "API работает, но не обрабатывает реальные данные"
+    }
+  ],
+  "fix_requirements": [
+    {
+      "priority": "CRITICAL",
+      "fix": "Исправить подпись в ingest endpoints",
+      "description": "Настроить правильную подпись или отключить проверку",
+      "impact": "Позволит Mod2 получать данные от Mod1"
+    },
+    {
+      "priority": "HIGH", 
+      "fix": "Включить ingest в SessionPage.tsx",
+      "description": "Раскомментировать ingest вызовы",
+      "impact": "Восстановит передачу данных Mod1 → Mod2"
+    },
+    {
+      "priority": "MEDIUM",
+      "fix": "Исправить validation errors",
+      "description": "Проверить обработку keyphrase в Mod2",
+      "impact": "Улучшит стабильность обработки"
+    }
+  ],
+  "current_status": "❌ Mod2 частично работает - ingest не функционирует, layout всегда дефолтный"
+}
+
+
+

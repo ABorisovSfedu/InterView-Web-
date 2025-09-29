@@ -1,0 +1,101 @@
+{
+  "system_configuration": "production_ready",
+  "timestamp": "2025-09-27T16:50:00Z",
+  "changes_made": [
+    "Удален mock клиент и вся mock логика",
+    "Система настроена для работы только с реальными модулями",
+    "Упрощена логика подключения к Mod1 и Mod2",
+    "Убраны fallback на демо режим"
+  ],
+  "current_status": {
+    "mod1_v2": {
+      "url": "http://localhost:8080",
+      "status": "required",
+      "fallback": "none",
+      "description": "Обязательный сервис для работы системы"
+    },
+    "mod2_v1": {
+      "url": "http://localhost:8000", 
+      "status": "required",
+      "fallback": "none",
+      "description": "Обязательный сервис для NLP обработки"
+    }
+  },
+  "user_interface": {
+    "status_indicators": [
+      "Mod1: Подключен/Ошибка/Подключение...",
+      "Mod2: Подключен/Ошибка/Подключение..."
+    ],
+    "recording_button": {
+      "enabled": "Только при подключении Mod1",
+      "disabled": "При недоступности Mod1",
+      "no_mock": "Нет fallback на демо режим"
+    },
+    "error_messages": {
+      "mod1_unavailable": "Mod1 сервис недоступен - запись невозможна",
+      "mod2_unavailable": "Mod2 сервис недоступен - layout не будет сгенерирован"
+    }
+  },
+  "data_flow": {
+    "step_1": "Проверка подключения к Mod1 и Mod2",
+    "step_2": "Если Mod1 недоступен - запись заблокирована",
+    "step_3": "Если Mod2 недоступен - layout не генерируется",
+    "step_4": "Полный поток: Аудио → Mod1 → Mod2 → Layout",
+    "step_5": "Никаких mock данных или демо режимов"
+  },
+  "requirements": {
+    "mod1_v2": {
+      "must_be_running": true,
+      "port": 8080,
+      "endpoints": [
+        "GET /healthz",
+        "WS /v1/stream", 
+        "POST /v1/transcribe"
+      ]
+    },
+    "mod2_v1": {
+      "must_be_running": true,
+      "port": 8000,
+      "endpoints": [
+        "GET /healthz",
+        "POST /v2/ingest/chunk",
+        "POST /v2/ingest/full",
+        "GET /v2/session/{id}/layout"
+      ]
+    }
+  },
+  "testing_instructions": [
+    "1. Убедитесь, что Mod1_v2 запущен на порту 8080",
+    "2. Убедитесь, что Mod2-v1 запущен на порту 8000", 
+    "3. Откройте http://localhost:3000",
+    "4. Проверьте статус: Mod1 и Mod2 должны быть 'Подключен'",
+    "5. Нажмите 'Начать запись' - кнопка должна быть активна",
+    "6. Говорите в микрофон - должны появляться чанки и layout"
+  ],
+  "troubleshooting": {
+    "mod1_not_connected": [
+      "Проверьте, что Mod1_v2 запущен: curl http://localhost:8080/healthz",
+      "Проверьте порт 8080: lsof -i :8080",
+      "Перезапустите Mod1_v2 сервис"
+    ],
+    "mod2_not_connected": [
+      "Проверьте, что Mod2-v1 запущен: curl http://localhost:8000/healthz",
+      "Проверьте порт 8000: lsof -i :8000", 
+      "Перезапустите Mod2-v1 сервис"
+    ],
+    "recording_disabled": [
+      "Mod1 должен быть подключен для записи",
+      "Нет fallback на mock клиент",
+      "Проверьте статус Mod1 в UI"
+    ]
+  },
+  "performance": {
+    "real_time_processing": true,
+    "no_mock_delays": true,
+    "direct_module_communication": true,
+    "optimized_for_production": true
+  }
+}
+
+
+
