@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-01-04T00:50:00Z",
+  "issue": "TypeError: Cannot convert undefined or null to object at Object.entries",
+  "status": "fixed",
+  "description": "Ошибка возникала при вызове Object.entries() с undefined или null значениями в различных компонентах",
+  "root_cause": "Отсутствие проверок на null/undefined перед вызовом Object.entries()",
+  "files_fixed": {
+    "src/components/BuilderPage.tsx": {
+      "issues": [
+        "Object.entries(pageModel.sections) без проверки pageModel.sections",
+        "Object.entries(pageModel.sections) в findSectionByBlockId без проверки",
+        "Object.values(pageModel.sections) в findBlockById без проверки"
+      ],
+      "fixes": [
+        "Добавлена проверка pageModel && pageModel.sections перед Object.entries()",
+        "Добавлена проверка !pageModel.sections в findSectionByBlockId",
+        "Добавлена проверка !pageModel.sections в findBlockById"
+      ]
+    },
+    "src/components/SessionPage.tsx": {
+      "issues": [
+        "Object.entries(message.layout.layout.sections) без проверки вложенных свойств"
+      ],
+      "fixes": [
+        "Добавлена проверка message.layout?.layout?.sections перед Object.entries()"
+      ]
+    },
+    "src/components/SessionViewPage.tsx": {
+      "issues": [
+        "Object.entries(pageModel.sections) без проверки pageModel.sections"
+      ],
+      "fixes": [
+        "Добавлена проверка pageModel.sections перед Object.entries()"
+      ]
+    },
+    "src/components/visual/VisualLibrary.tsx": {
+      "issues": [
+        "Object.entries(sections) без проверки sections",
+        "Object.entries(layout.sections) без проверки layout.sections"
+      ],
+      "fixes": [
+        "Добавлена проверка sections перед Object.entries()",
+        "Добавлена проверка layout.sections || {} в Object.entries()"
+      ]
+    },
+    "src/components/visual/PageBuilder.tsx": {
+      "issues": [
+        "Object.entries(layout.sections) без проверки layout.sections (2 места)",
+        "Object.entries(pageLayout.sections) без проверки pageLayout.sections"
+      ],
+      "fixes": [
+        "Заменено Object.entries(layout.sections) на Object.entries(layout.sections || {})",
+        "Добавлена проверка pageLayout.sections перед Object.entries()"
+      ]
+    }
+  },
+  "prevention": {
+    "best_practices": [
+      "Всегда проверять объекты на null/undefined перед вызовом Object.entries()",
+      "Использовать optional chaining (?.) для безопасного доступа к вложенным свойствам",
+      "Предоставлять значения по умолчанию (|| {}) для объектов, которые могут быть undefined",
+      "Добавлять проверки в начале функций, которые работают с объектами"
+    ],
+    "code_patterns": [
+      "if (obj && obj.property) Object.entries(obj.property)",
+      "Object.entries(obj.property || {})",
+      "obj?.property && Object.entries(obj.property)"
+    ]
+  },
+  "testing": {
+    "frontend_status": "✅ Работает",
+    "linter_status": "✅ Нет ошибок",
+    "error_resolved": "✅ TypeError исправлен"
+  },
+  "impact": {
+    "before": "Приложение падало с ошибкой TypeError при попытке отобразить компоненты",
+    "after": "Приложение корректно обрабатывает случаи когда объекты sections не определены",
+    "user_experience": "Улучшена стабильность приложения, устранены падения"
+  }
+}

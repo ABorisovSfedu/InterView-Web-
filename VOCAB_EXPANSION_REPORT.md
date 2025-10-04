@@ -179,3 +179,7 @@ curl -s http://localhost:9000/v1/vocab | jq '.terms[] | {term: .term, components
 4. Оптимизация алгоритмов сопоставления
 
 
+
+
+
+

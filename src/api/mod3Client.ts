@@ -39,6 +39,12 @@ export interface MapResponse {
     count: number;
   };
   matches: ComponentMatch[];
+  explanations: Array<{
+    term: string;
+    matched_component: string;
+    match_type: string;
+    score: number;
+  }>;
 }
 
 export interface VocabTerm {
@@ -271,8 +277,8 @@ export class Mod3Client {
 
 // Создаем экземпляр клиента с настройками по умолчанию
 export const mod3Client = new Mod3Client({
-  baseUrl: import.meta.env.VITE_MOD3_BASE_URL || 'http://localhost:9000',
-  apiKey: import.meta.env.VITE_MOD3_API_KEY
+  baseUrl: 'http://localhost:9001',
+  apiKey: undefined
 });
 
 export default mod3Client;

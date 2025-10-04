@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-01-31T13:45:00Z",
+  "changes": "Обновлено отображение результатов Mod2",
+  "details": {
+    "removed": "Извлеченные сущности (entities)",
+    "kept": "Только ключевые фразы (keyphrases)",
+    "improved": "Стили для темной темы"
+  },
+  "styling_improvements": {
+    "title": {
+      "font": "font-semibold text-lg",
+      "dark_theme": "text-purple-300",
+      "light_theme": "text-purple-800"
+    },
+    "phrase_cards": {
+      "padding": "p-3",
+      "border_radius": "rounded-lg",
+      "spacing": "space-y-2",
+      "hover_effect": "transition-colors duration-200"
+    },
+    "dark_theme": {
+      "background": "bg-purple-500/10",
+      "border": "border-purple-400/30",
+      "hover": "hover:bg-purple-500/20",
+      "text": "text-purple-200"
+    },
+    "light_theme": {
+      "background": "bg-purple-50",
+      "border": "border-purple-200",
+      "hover": "hover:bg-purple-100",
+      "text": "text-purple-800"
+    },
+    "number_badges": {
+      "size": "w-6 h-6",
+      "shape": "rounded-full",
+      "dark_theme": "bg-purple-500/20 text-purple-300",
+      "light_theme": "bg-purple-200 text-purple-700"
+    }
+  },
+  "visual_improvements": {
+    "numbered_list": "Каждая фраза имеет номер",
+    "better_spacing": "Увеличенные отступы и промежутки",
+    "hover_effects": "Плавные переходы при наведении",
+    "consistent_colors": "Единая цветовая схема для темной темы"
+  },
+  "expected_result": {
+    "mod2_display": "Только ключевые фразы с улучшенным дизайном",
+    "dark_theme": "Красивые фиолетовые оттенки для темной темы",
+    "light_theme": "Сохранены существующие стили для светлой темы",
+    "user_experience": "Более читаемый и привлекательный интерфейс"
+  }
+}

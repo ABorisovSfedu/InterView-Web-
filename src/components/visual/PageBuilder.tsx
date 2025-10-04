@@ -165,7 +165,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({
 <body class="bg-gray-50">
 `;
 
-    Object.entries(layout.sections).forEach(([sectionName, components]) => {
+    Object.entries(layout.sections || {}).forEach(([sectionName, components]) => {
       html += `    <section class="section-${sectionName} mb-8">\n`;
       components.forEach(component => {
         html += `        <div class="component-${component.type} mb-4">\n`;
@@ -191,7 +191,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({
 
 `;
 
-    Object.entries(layout.sections).forEach(([sectionName, components]) => {
+    Object.entries(layout.sections || {}).forEach(([sectionName, components]) => {
       css += `.section-${sectionName} {
     padding: 2rem 0;
 }
@@ -349,7 +349,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({
               <TabsContent value="preview" className="mt-4">
                 <div className="space-y-4">
                   <h3 className="font-semibold">Секции страницы</h3>
-                  {Object.entries(pageLayout.sections).map(([sectionName, components]) => (
+                  {pageLayout.sections && Object.entries(pageLayout.sections).map(([sectionName, components]) => (
                     <Card key={sectionName}>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm capitalize">
@@ -474,5 +474,9 @@ const PageBuilder: React.FC<PageBuilderProps> = ({
 };
 
 export default PageBuilder;
+
+
+
+
 
 

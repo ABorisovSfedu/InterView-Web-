@@ -1,7 +1,7 @@
 // Определяем базовый URL API в зависимости от окружения
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api'  // В продакшене используем относительный путь (nginx проксирует)
-  : 'http://localhost:3002/api';  // В разработке используем прямой URL
+  : 'http://localhost:5001/api';  // В разработке используем прямой URL к бэкенду
 
 class ApiClient {
   constructor() {

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Button } from "./components/ui/button";
 import {
   Card,
@@ -36,17 +37,75 @@ import {
   Clock,
   Settings,
 } from "lucide-react";
-import { useState } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Состояние формы обратной связи
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('idle' as 'idle' | 'success' | 'error');
+  const [submitMessage, setSubmitMessage] = useState('');
 
   const scrollTo = (id: string) => {
     document
       .getElementById(id)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
     setMobileMenuOpen(false);
+  };
+
+  // Обработка изменений в форме
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Отправка формы
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setSubmitMessage('');
+
+    try {
+      const response = await fetch('http://localhost:5001/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage(data.message);
+        setContactForm({ name: '', email: '', message: '' });
+      } else {
+        setSubmitStatus('error');
+        // Показываем детали ошибок валидации, если они есть
+        if (data.details && Array.isArray(data.details)) {
+          const errorMessages = data.details.map((detail: any) => detail.msg).join(', ');
+          setSubmitMessage(`Ошибка валидации: ${errorMessages}`);
+        } else {
+          setSubmitMessage(data.error || 'Произошла ошибка при отправке сообщения');
+        }
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      setSubmitMessage('Ошибка сети. Проверьте подключение к интернету.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -298,9 +357,9 @@ export default function App() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl" />
                 <ImageWithFallback
-                  src="https://sdmntpreastus.oaiusercontent.com/files/00000000-89f4-61f9-83b5-09da27371727/raw?se=2025-08-30T17%3A24%3A01Z&sp=r&sv=2024-08-04&sr=b&scid=cf0dc659-dfdd-50bc-a505-6cbe7086c585&skoid=5cab1ff4-c20d-41dc-babb-df0c2cc21dd4&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-29T20%3A15%3A26Z&ske=2025-08-30T20%3A15%3A26Z&sks=b&skv=2024-08-04&sig=p8mwMCDFj5G4TNRdOfUr3Zh2iVFyoucHXGplnhazCDI%3D"
+                  src="/hero-image.jpg"
                   alt="Современное рабочее место веб-дизайнера"
-                  className="relative  object-cover rounded-3xl shadow-2xl shadow-purple-500/25"
+                  className="relative object-cover rounded-3xl shadow-2xl shadow-purple-500/25"
                 />
               </div>
             </div>
@@ -811,7 +870,7 @@ export default function App() {
                         Email для связи
                       </p>
                       <p className="text-xl text-gray-900">
-                        info@interview-platform.ru
+                        aborisov@sfedu.ru
                       </p>
                     </div>
                   </div>
@@ -847,7 +906,7 @@ export default function App() {
                     asChild
                   >
                     <a
-                      href="https://t.me/"
+                      href="https://t.me/BorisovAr"
                       aria-label="Telegram канал"
                       className="flex items-center gap-3"
                     >
@@ -866,7 +925,7 @@ export default function App() {
                     asChild
                   >
                     <a
-                      href="https://vk.com/"
+                      href="https://vk.com/ar_borisov"
                       aria-label="VK сообщество"
                       className="flex items-center gap-3"
                     >
@@ -876,25 +935,6 @@ export default function App() {
                         </span>
                       </div>
                       VKontakte
-                    </a>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 h-14 text-lg"
-                    asChild
-                  >
-                    <a
-                      href="https://github.com/"
-                      aria-label="Max"
-                      className="flex items-center gap-3"
-                    >
-                      <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                        <span className="text-white text-sm">
-                          M
-                        </span>
-                      </div>
-                      Max
                     </a>
                   </Button>
                 </div>
@@ -927,56 +967,88 @@ export default function App() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="name"
-                          className="text-lg"
-                        >
-                          Имя
-                        </label>
-                        <Input
-                          id="name"
-                          placeholder="Ваше имя"
-                          className="h-12 text-lg"
-                        />
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label
+                            htmlFor="name"
+                            className="text-lg"
+                          >
+                            Имя
+                          </label>
+                          <Input
+                            id="name"
+                            name="name"
+                            value={contactForm.name}
+                            onChange={handleInputChange}
+                            placeholder="Ваше имя"
+                            className="h-12 text-lg"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label
+                            htmlFor="email"
+                            className="text-lg"
+                          >
+                            Email
+                          </label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={contactForm.email}
+                            onChange={handleInputChange}
+                            placeholder="your@email.com"
+                            className="h-12 text-lg"
+                            required
+                          />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label
-                          htmlFor="email"
+                          htmlFor="message"
                           className="text-lg"
                         >
-                          Email
+                          Сообщение
                         </label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="your@email.com"
-                          className="h-12 text-lg"
+                        <Textarea
+                          id="message"
+                          name="message"
+                          value={contactForm.message}
+                          onChange={handleInputChange}
+                          placeholder="Опишите ваши задачи и ожидания..."
+                          rows={6}
+                          className="text-lg"
+                          required
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="message"
-                        className="text-lg"
+                      
+                      {/* Статус отправки */}
+                      {submitStatus === 'success' && (
+                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <p className="text-green-800 text-center">{submitMessage}</p>
+                        </div>
+                      )}
+                      
+                      {submitStatus === 'error' && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-red-800 text-center">{submitMessage}</p>
+                        </div>
+                      )}
+                      
+                      <Button 
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white py-6 text-lg shadow-lg disabled:opacity-50"
                       >
-                        Сообщение
-                      </label>
-                      <Textarea
-                        id="message"
-                        placeholder="Опишите ваши задачи и ожидания..."
-                        rows={6}
-                        className="text-lg"
-                      />
-                    </div>
-                    <Button className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white py-6 text-lg shadow-lg">
-                      Отправить сообщение
-                      <ArrowRight
-                        className="w-5 h-5 ml-2"
-                        aria-hidden
-                      />
-                    </Button>
+                        {isSubmitting ? 'Отправка...' : 'Отправить сообщение'}
+                        <ArrowRight
+                          className="w-5 h-5 ml-2"
+                          aria-hidden
+                        />
+                      </Button>
+                    </form>
                   </CardContent>
                 </div>
               </Card>

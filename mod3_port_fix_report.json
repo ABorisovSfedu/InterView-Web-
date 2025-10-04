@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-01-31T14:15:00Z",
+  "issue": "Mod3 пытается подключиться к порту 9000 вместо 9001",
+  "root_cause": "Проблема с переменными окружения или кэшированием браузера",
+  "details": {
+    "error_log": "GET http://localhost:9000/healthz net::ERR_CONNECTION_REFUSED",
+    "correct_port": "9001",
+    "mod3_status": "Работает на порту 9001",
+    "problem": "import.meta.env может работать неправильно"
+  },
+  "fixes_applied": [
+    {
+      "file": "src/api/mod3Client.ts",
+      "change": "Жестко задан правильный порт 9001",
+      "before": "baseUrl: (import.meta as any).env?.VITE_MOD3_BASE_URL || 'http://localhost:9001'",
+      "after": "baseUrl: 'http://localhost:9001'"
+    }
+  ],
+  "verification": {
+    "mod3_port_9001": "✅ Работает",
+    "mod3_health": "✅ /healthz отвечает",
+    "mod3_components": "✅ /v1/components работает",
+    "mod3_map": "✅ /v1/map должен работать"
+  },
+  "test_commands": {
+    "health_check": "curl http://localhost:9001/healthz",
+    "components": "curl http://localhost:9001/v1/components",
+    "map_test": "curl -X POST http://localhost:9001/v1/map -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"entities\":[\"кнопка\"],\"keyphrases\":[\"кнопка\"],\"template\":\"hero-main-footer\"}'"
+  },
+  "expected_behavior": {
+    "mod3_connection": "Should connect to port 9001",
+    "health_check": "Should pass Mod3 health check",
+    "automatic_flow": "Mod2 → Mod3 should work automatically",
+    "layout_generation": "Should generate layout from entities"
+  },
+  "next_steps": [
+    "Test voice recording with Mod3 integration",
+    "Verify layout generation works",
+    "Check if browser cache needs clearing"
+  ]
+}

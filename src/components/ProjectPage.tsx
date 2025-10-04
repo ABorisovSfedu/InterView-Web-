@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Settings, Play, Square, Upload, FileText, Database, Edit3, Save, Download, Mic, MicOff, AlertCircle, CheckCircle, Clock, Users, Calendar, BarChart3, Trash2 } from "lucide-react";
+import { ArrowLeft, Settings, Play, Square, Upload, FileText, Database, Edit3, Save, Download, Mic, MicOff, AlertCircle, CheckCircle, Clock, Users, Calendar, BarChart3, Trash2, Layout } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -439,42 +439,52 @@ function ProjectPage() {
                       Управление интервью и импортированными материалами
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={async () => {
-                      if (!project) {
-                        setError('Проект не загружен');
-                        return;
-                      }
-                      
-                      // Проверяем лимиты тарифа
-                      if (user?.plan === 'basic' && userSessions.length >= 1) {
-                        setError('Достигнут лимит сессий для базового тарифа (1 сессия в неделю)');
-                        return;
-                      }
-                      
-                      try {
-                        const response = await apiClient.createSession(project.id, 'interview');
-                        const session = response.session || response;
-                        // Обновляем список сессий
-                        setSessions(prev => [...prev, session]);
-                        setUserSessions(prev => [...prev, session]);
-                        window.history.pushState({}, "", `/projects/${project.id}/sessions/${session.id}`);
-                        window.dispatchEvent(new Event("popstate"));
-                      } catch (err) {
-                        console.error('Ошибка создания сессии:', err);
-                        setError(err instanceof Error ? err.message : 'Ошибка создания сессии');
-                      }
-                    }}
-                    disabled={user?.plan === 'basic' && userSessions.length >= 1}
-                    className={`${
-                      user?.plan === 'basic' && userSessions.length >= 1
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-                    } text-white`}
-                  >
-                    <Mic className="w-4 h-4 mr-2" />
-                    {user?.plan === 'basic' && userSessions.length >= 1 ? 'Лимит достигнут' : 'Новая сессия'}
-                  </Button>
+                  <div className="flex items-center gap-3">
+        <Button
+          onClick={() => window.location.href = '/builder/new'}
+          variant="outline"
+          className="border-blue-500 text-blue-600 hover:bg-blue-50"
+        >
+          <Layout className="w-4 h-4 mr-2" />
+          Ручной конструктор
+        </Button>
+                    <Button
+                      onClick={async () => {
+                        if (!project) {
+                          setError('Проект не загружен');
+                          return;
+                        }
+                        
+                        // Проверяем лимиты тарифа
+                        if (user?.plan === 'basic' && userSessions.length >= 1) {
+                          setError('Достигнут лимит сессий для базового тарифа (1 сессия в неделю)');
+                          return;
+                        }
+                        
+                        try {
+                          const response = await apiClient.createSession(project.id, 'interview');
+                          const session = response.session || response;
+                          // Обновляем список сессий
+                          setSessions(prev => [...prev, session]);
+                          setUserSessions(prev => [...prev, session]);
+                          window.history.pushState({}, "", `/projects/${project.id}/sessions/${session.id}`);
+                          window.dispatchEvent(new Event("popstate"));
+                        } catch (err) {
+                          console.error('Ошибка создания сессии:', err);
+                          setError(err instanceof Error ? err.message : 'Ошибка создания сессии');
+                        }
+                      }}
+                      disabled={user?.plan === 'basic' && userSessions.length >= 1}
+                      className={`${
+                        user?.plan === 'basic' && userSessions.length >= 1
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                      } text-white`}
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      {user?.plan === 'basic' && userSessions.length >= 1 ? 'Лимит достигнут' : 'Новая сессия'}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

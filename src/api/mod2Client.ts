@@ -25,6 +25,14 @@ export interface FullIngestRequest {
   chunks?: any[];
 }
 
+export interface EntitiesResponse {
+  status: string;
+  session_id: string;
+  entities: string[];
+  keyphrases: string[];
+  chunks_processed: number;
+}
+
 export interface LayoutResponse {
   status: string;
   session_id: string;
@@ -105,6 +113,23 @@ export class Mod2Client {
       const errorText = await response.text();
       throw new Error(`Failed to ingest full result: ${response.statusText} - ${errorText}`);
     }
+  }
+
+  /**
+   * Получение сущностей для сессии
+   */
+  async getSessionEntities(sessionId: string): Promise<EntitiesResponse> {
+    const response = await fetch(`${this.config.baseUrl}/v2/session/${sessionId}/entities`, {
+      headers: {
+        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` })
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get session entities: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
   /**
@@ -189,7 +214,7 @@ export class Mod2Client {
 
 // Создаем экземпляр клиента с настройками по умолчанию
 export const mod2Client = new Mod2Client({
-  baseUrl: import.meta.env.VITE_MOD2_BASE_URL || 'http://localhost:8000',
+  baseUrl: import.meta.env.VITE_MOD2_BASE_URL || 'http://localhost:8001',
   apiKey: import.meta.env.VITE_MOD2_API_KEY
 });
 

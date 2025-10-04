@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-01-31T12:00:00Z",
+  "issue": "Mod1 REST API endpoint error 405 Method Not Allowed",
+  "root_cause": "Incorrect endpoint path in mod1Client.ts",
+  "fixes_applied": [
+    {
+      "file": "src/api/mod1Client.ts",
+      "change": "Updated endpoint from /transcribe to /v1/transcribe",
+      "line": 71,
+      "before": "/transcribe?session_id=...",
+      "after": "/v1/transcribe?session_id=..."
+    }
+  ],
+  "verification": {
+    "mod1_status": "Running on port 8080",
+    "endpoint_test": "POST /v1/transcribe returns proper validation error",
+    "form_data_field": "Correctly uses 'file' field",
+    "frontend_status": "Running and accessible"
+  },
+  "expected_behavior": {
+    "voice_recording": "Should now work with Mod1 REST API",
+    "error_resolution": "405 Method Not Allowed should be resolved",
+    "transcription_flow": "Audio → Mod1 → Mod2 → Mod3 → Results"
+  },
+  "next_steps": [
+    "Test voice recording functionality",
+    "Verify transcription results display",
+    "Check sequential results flow"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-01-31T13:00:00Z",
+  "issue": "Mod2 возвращает только ключевые слова вместо секций и компонентов",
+  "root_cause": "Неправильная логика интеграции - Mod2 извлекает сущности, а не генерирует layout",
+  "details": {
+    "mod2_response": "Returns entities and keyphrases, not layout",
+    "expected_behavior": "Mod2 should extract entities, Mod3 should generate layout",
+    "current_flow": "Mod1 → Mod2 (entities) → Mod3 (layout generation)"
+  },
+  "fixes_applied": [
+    {
+      "file": "src/api/mod2Client.ts",
+      "changes": [
+        "Added getSessionEntities method",
+        "Added EntitiesResponse interface"
+      ]
+    },
+    {
+      "file": "src/components/SessionPage.tsx",
+      "changes": [
+        "Updated voice recording flow: getSessionEntities instead of getSessionLayout",
+        "Updated text input flow: getSessionEntities instead of getSessionLayout",
+        "Added Mod3 layout generation based on entities from Mod2",
+        "Updated VoiceMessage interface to include entities field",
+        "Updated result display to show entities and keyphrases from Mod2",
+        "Fixed all type errors with TranscribeResponse interface"
+      ]
+    }
+  ],
+  "new_architecture": {
+    "mod1": "Transcribes audio to text",
+    "mod2": "Extracts entities and keyphrases from text",
+    "mod3": "Generates layout based on entities from Mod2",
+    "flow": "Audio → Mod1 → Mod2 (entities) → Mod3 (layout) → Results"
+  },
+  "verification": {
+    "mod2_entities": "Should return entities and keyphrases",
+    "mod3_layout": "Should generate layout based on entities",
+    "display": "Should show entities from Mod2 and layout from Mod3",
+    "types": "All TypeScript errors resolved"
+  },
+  "expected_behavior": {
+    "voice_recording": "Should show entities from Mod2, then layout from Mod3",
+    "text_input": "Should show entities from Mod2, then layout from Mod3",
+    "sequential_display": "Should show progress: Mod1 → Mod2 (entities) → Mod3 (layout) → Complete"
+  }
+}

@@ -10,6 +10,7 @@ require('dotenv').config({ path: './config.env' });
 const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const sessionRoutes = require('./routes/sessions');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,7 +25,13 @@ app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3004'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization',
+    'X-Request-Id',
+    'X-Session-Id', 
+    'X-Client'
+  ]
 }));
 
 // Rate limiting
@@ -51,6 +58,46 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/contact', contactRoutes);
+
+// Web layout endpoints
+app.post('/api/web/v1/session/:sessionId/layout', (req, res) => {
+  const { sessionId } = req.params;
+  const { layout } = req.body;
+  
+  if (!layout) {
+    return res.status(400).json({
+      status: 'error',
+      error: 'Layout is required'
+    });
+  }
+  
+  // Простое сохранение в память (в реальном приложении - в БД)
+  console.log(`💾 Layout сохранен для сессии ${sessionId}:`, {
+    timestamp: new Date().toISOString(),
+    template: layout.template,
+    blocksCount: layout.blocks?.length || 0
+  });
+  
+  res.json({
+    status: 'ok',
+    session_id: sessionId,
+    layout_data: layout,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  });
+});
+
+app.get('/api/web/v1/session/:sessionId/layout', (req, res) => {
+  const { sessionId } = req.params;
+  
+  // В реальном приложении - загрузка из БД
+  res.status(404).json({
+    status: 'error',
+    error: 'Layout not found',
+    session_id: sessionId
+  });
+});
 
 // Проверка здоровья сервера
 app.get('/api/health', (req, res) => {

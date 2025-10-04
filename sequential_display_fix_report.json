@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-01-31T13:30:00Z",
+  "issue": "Результаты Mod2 отображаются в блоке Mod3 в пошаговых результатах",
+  "root_cause": "Неправильная логика отображения в пошаговых результатах - использовались старые поля",
+  "details": {
+    "problem": "В блоке Mod2 использовался message.layout вместо message.entities",
+    "result": "Результаты Mod2 показывались в блоке Mod3",
+    "display_logic": "Неправильные условия для отображения данных в пошаговых результатах"
+  },
+  "fixes_applied": [
+    {
+      "file": "src/components/SessionPage.tsx",
+      "changes": [
+        "Исправлен блок Mod2: message.layout → message.entities",
+        "Обновлено содержимое Mod2: показывать сущности и ключевые фразы",
+        "Исправлен блок Mod3: убраны сущности, оставлен только layout",
+        "Обновлены условия отображения для правильной последовательности"
+      ]
+    }
+  ],
+  "correct_display_logic": {
+    "mod1_step": "Показать транскрипцию (message.finalResult)",
+    "mod2_step": "Показать сущности и ключевые фразы (message.entities)",
+    "mod3_step": "Показать layout и сопоставления (message.mod3Mapping)",
+    "complete_step": "Показать финальный результат"
+  },
+  "expected_behavior": {
+    "step_1_mod1": "Транскрипция речи",
+    "step_2_mod2": "Извлеченные сущности и ключевые фразы",
+    "step_3_mod3": "Layout и сопоставления компонентов",
+    "step_4_complete": "Финальный результат"
+  },
+  "verification": {
+    "mod2_display": "Should show entities and keyphrases in Mod2 step",
+    "mod3_display": "Should show layout and mappings in Mod3 step",
+    "no_cross_display": "No Mod2 data in Mod3 step or vice versa",
+    "sequential_flow": "Correct step-by-step progression"
+  }
+}

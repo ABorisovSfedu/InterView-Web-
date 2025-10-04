@@ -15,7 +15,8 @@ import {
   RotateCcw,
   Wifi,
   WifiOff,
-  X
+  X,
+  Send
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -25,7 +26,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../api/client";
 import mod1Client, { WebSocketMessage, ChunkData, TranscribeResponse } from "../api/mod1Client";
-import mod2Client, { LayoutResponse } from "../api/mod2Client";
+import mod2Client, { LayoutResponse, EntitiesResponse } from "../api/mod2Client";
 import mod3Client, { MapResponse, ComponentMatch } from "../api/mod3Client";
 import PageBuilder from "./visual/PageBuilder";
 
@@ -50,6 +51,7 @@ type VoiceMessage = {
   transcript?: string;
   chunks?: ChunkData[];
   finalResult?: TranscribeResponse;
+  entities?: EntitiesResponse;
   layout?: LayoutResponse;
   mod3Mapping?: MapResponse;
 };
@@ -59,47 +61,54 @@ const mockAccount = { name: "Иван Иванов", email: "ivan@example.com" }
 function SessionPage() {
   const { isDark, toggleTheme } = useTheme();
   const { user } = useAuth();
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [recordingTime, setRecordingTime] = useState<number>(0);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [voiceMessages, setVoiceMessages] = useState<VoiceMessage[]>([]);
-  const [isDragOver, setIsDragOver] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState([] as UploadedFile[]);
+  const [voiceMessages, setVoiceMessages] = useState([] as VoiceMessage[]);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null as string | null);
   
   // Mod1 интеграция состояния
-  const [isMod1Connected, setIsMod1Connected] = useState<boolean>(false);
-  const [mod1Status, setMod1Status] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [currentSessionId, setCurrentSessionId] = useState<string>('');
+  const [isMod1Connected, setIsMod1Connected] = useState(false);
+  const [mod1Status, setMod1Status] = useState('disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error');
+  const [currentSessionId, setCurrentSessionId] = useState('');
   
   // Mod2 интеграция состояния
-  const [isMod2Connected, setIsMod2Connected] = useState<boolean>(false);
-  const [mod2Status, setMod2Status] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [vocabData, setVocabData] = useState<any>(null);
-  const [showVocab, setShowVocab] = useState<boolean>(false);
-  const [audioLevel, setAudioLevel] = useState<number>(0);
+  const [isMod2Connected, setIsMod2Connected] = useState(false);
+  const [mod2Status, setMod2Status] = useState('disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error');
+  const [vocabData, setVocabData] = useState(null as any);
+  const [showVocab, setShowVocab] = useState(false);
+  const [textInput, setTextInput] = useState('');
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [showTextForm, setShowTextForm] = useState(true);
+  const [showVoiceForm, setShowVoiceForm] = useState(true);
   
   // Mod3 интеграция состояния
-  const [isMod3Connected, setIsMod3Connected] = useState<boolean>(false);
-  const [mod3Status, setMod3Status] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [mod3VocabData, setMod3VocabData] = useState<any>(null);
-  const [showMod3Vocab, setShowMod3Vocab] = useState<boolean>(false);
+  const [isMod3Connected, setIsMod3Connected] = useState(false);
+  const [mod3Status, setMod3Status] = useState('disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error');
+  const [mod3VocabData, setMod3VocabData] = useState(null as any);
+  const [showMod3Vocab, setShowMod3Vocab] = useState(false);
   
   // PageBuilder состояние
-  const [showPageBuilder, setShowPageBuilder] = useState<boolean>(false);
-  const [currentPageLayout, setCurrentPageLayout] = useState<any>(null);
-  const [autoShowPageBuilder, setAutoShowPageBuilder] = useState<boolean>(true);
+  const [showPageBuilder, setShowPageBuilder] = useState(false);
+  const [currentPageLayout, setCurrentPageLayout] = useState(null as any);
+  const [autoShowPageBuilder, setAutoShowPageBuilder] = useState(true);
   
   // Последовательный показ результатов
-  const [currentStep, setCurrentStep] = useState<'recording' | 'mod1' | 'mod2' | 'mod3' | 'complete'>('recording');
-  const [showSequentialResults, setShowSequentialResults] = useState<boolean>(false);
+  const [currentStep, setCurrentStep] = useState('recording' as 'recording' | 'mod1' | 'mod2' | 'mod3' | 'complete');
+  const [showSequentialResults, setShowSequentialResults] = useState(false);
   
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  // Получаем sessionId из URL
+  const pathParts = window.location.pathname.split('/');
+  const sessionId = pathParts[4];
+  
+  const mediaRecorderRef = useRef(null as MediaRecorder | null);
+  const recordingIntervalRef = useRef(null as NodeJS.Timeout | null);
+  const audioChunksRef = useRef([] as Blob[]);
+  const audioContextRef = useRef(null as AudioContext | null);
+  const analyserRef = useRef(null as AnalyserNode | null);
+  const animationFrameRef = useRef(null as number | null);
 
   // Инициализация Mod1 и Mod2 подключений
   useEffect(() => {
@@ -271,10 +280,10 @@ function SessionPage() {
           console.log('🔄 Sending final result to Mod2...');
           await mod2Client.ingestFull({
             session_id: finalResult.session_id,
-            text_full: finalResult.text_full,
+            text_full: (finalResult as any).text_full || '',
             lang: 'ru-RU',
-            duration_sec: finalResult.duration_sec || 0,
-            total_chunks: finalResult.total_chunks || 0,
+            duration_sec: (finalResult as any).duration_sec || 0,
+            total_chunks: (finalResult as any).total_chunks || 0,
             chunks: (finalResult as any).chunks || []
           });
           console.log('✅ Final result sent to Mod2');
@@ -309,8 +318,8 @@ function SessionPage() {
               });
               
               // Добавляем ключевые фразы из транскрипции
-              if (finalResult.text_full) {
-                keyphrases.push(finalResult.text_full);
+              if ((finalResult as any).text_full) {
+                keyphrases.push((finalResult as any).text_full);
               }
               
               mod3Mapping = await mod3Client.mapEntities({
@@ -337,7 +346,7 @@ function SessionPage() {
                     ...vm, 
                     status: 'completed',
                     finalResult,
-                    transcript: finalResult.text_full,
+                    transcript: (finalResult as any).text_full,
                     layout,
                     mod3Mapping
                   }
@@ -355,7 +364,7 @@ function SessionPage() {
                     ...vm, 
                     status: 'completed',
                     finalResult,
-                    transcript: finalResult.text_full
+                    transcript: (finalResult as any).text_full
                   }
                 : vm
             )
@@ -371,7 +380,7 @@ function SessionPage() {
                   ...vm, 
                   status: 'completed',
                   finalResult,
-                  transcript: finalResult.text_full
+                  transcript: (finalResult as any).text_full
                 }
               : vm
           )
@@ -533,19 +542,8 @@ function SessionPage() {
             console.warn('⚠️ Very small audio chunk detected:', event.data.size, 'bytes - possible silence');
           }
           
-          // Отправляем аудио данные в Mod1 через WebSocket в реальном времени
-          if (isMod1Connected) {
-            console.log('🔄 Converting audio data to buffer...');
-            event.data.arrayBuffer().then(buffer => {
-              console.log('📡 Sending audio buffer to Mod1...');
-              console.log('📊 Buffer size:', buffer.byteLength, 'bytes');
-              mod1Client.sendAudioData(buffer);
-            }).catch(error => {
-              console.error('❌ Error converting audio data:', error);
-            });
-          } else {
-            console.warn('⚠️ Mod1 not connected, skipping audio data send');
-          }
+          // Аудио данные будут обработаны после остановки записи через REST API
+          console.log('📊 Audio chunk received, size:', event.data.size, 'bytes');
         } else {
           console.warn('⚠️ Empty audio chunk received');
         }
@@ -585,11 +583,16 @@ function SessionPage() {
         
         setVoiceMessages(prev => [...prev, newVoiceMessage]);
         
-        // Отключаемся от WebSocket после завершения записи
-        console.log('🔌 Disconnecting WebSocket...');
-        mod1Client.disconnectWebSocket();
+        // Скрываем обе формы сразу после создания сообщения
+        setShowTextForm(false);
+        setShowVoiceForm(false);
         
-        // Всегда используем REST API как fallback для получения результатов
+        // Сразу показываем пошаговые результаты
+        setShowSequentialResults(true);
+        setCurrentStep('mod1');
+        console.log('🎯 Показываем пошаговые результаты сразу после остановки записи');
+        
+        // Используем REST API для получения результатов
         try {
           console.log('🔄 Sending audio file to Mod1 via REST API...');
           console.log('📊 Blob size:', blob.size, 'bytes, type:', blob.type);
@@ -597,16 +600,10 @@ function SessionPage() {
           console.log('🕐 Recording time:', recordingTime, 'seconds');
           console.log('📅 Recorded at:', new Date().toLocaleString());
           
-          // Создаем файл совместимым способом
-          let file;
-          try {
-            file = new File([blob], `recording_${sessionId}.webm`, { type: 'audio/webm' });
-            console.log('✅ File created successfully');
-          } catch (error) {
-            console.warn('⚠️ File constructor failed, using blob:', error);
-            file = blob;
+          // Используем blob напрямую для совместимости
+          const file = blob as any;
             file.name = `recording_${sessionId}.webm`;
-          }
+          console.log('✅ Using blob as file for compatibility');
           
           console.log('📁 Created file:', file.name, 'size:', file.size);
           
@@ -620,7 +617,7 @@ function SessionPage() {
           console.log('✅ REST API transcription completed:', result);
           
           // Проверяем, есть ли реальный результат транскрипции
-          if (!result.text_full || result.text_full.trim() === '') {
+          if (!(result as any).text_full || (result as any).text_full.trim() === '') {
             console.warn('⚠️ Empty transcription result - possible silence or very short audio');
             setError('Транскрипция пустая. Возможно, запись слишком короткая или микрофон не работает. Попробуйте записать дольше и громче.');
           }
@@ -631,12 +628,22 @@ function SessionPage() {
                 ? { 
                     ...vm, 
                     status: "completed",
-                    transcript: result.text_full || 'Транскрипция пустая',
-                    finalResult: result
+                    transcript: (result as any).text_full || 'Транскрипция пустая',
+                    finalResult: {
+                      session_id: result.session_id,
+                      text_full: (result as any).text_full,
+                      lang: result.language,
+                      duration_sec: recordingTime,
+                      total_chunks: 1
+                    }
                   }
                 : vm
             )
           );
+          
+          // Обновляем шаг на Mod2 сразу после получения результатов Mod1
+          setCurrentStep('mod2');
+          console.log('🎯 Mod1 завершен, переходим к Mod2');
           
           // Отправляем данные в Mod2 и получаем layout
           if (isMod2Connected) {
@@ -644,10 +651,10 @@ function SessionPage() {
               console.log('🔄 Sending final result to Mod2...');
               await mod2Client.ingestFull({
                 session_id: sessionId,
-                text_full: result.text_full,
-                lang: 'ru-RU',
-                duration_sec: result.duration_sec || 0,
-                total_chunks: result.total_chunks || 0,
+                text_full: (result as any).text_full,
+                lang: result.language || 'ru-RU',
+                duration_sec: recordingTime,
+                total_chunks: 1,
                 chunks: (result as any).chunks || []
               });
               console.log('✅ Final result sent to Mod2');
@@ -655,104 +662,84 @@ function SessionPage() {
               // Небольшая задержка для обработки в Mod2
               await new Promise(resolve => setTimeout(resolve, 1000));
               
-              console.log('🔄 Getting layout from Mod2...');
-              const layout = await mod2Client.getSessionLayout(sessionId);
-              console.log('✅ Layout получен от Mod2:', layout);
-              console.log('🔍 Layout structure:', JSON.stringify(layout, null, 2));
+              console.log('🔄 Getting entities from Mod2...');
+              const entitiesResult = await mod2Client.getSessionEntities(sessionId);
+              console.log('✅ Entities получены от Mod2:', entitiesResult);
               
               // Получаем mapping от Mod3
-              let mod3Mapping: MapResponse | null = null;
-              if (isMod3Connected && layout && layout.layout) {
+              let mod3Mapping: MapResponse | undefined = undefined;
+              if (isMod3Connected && entitiesResult && entitiesResult.entities) {
                 try {
-                  console.log('🔄 Getting mapping from Mod3...');
-                  // Извлекаем entities и keyphrases из layout для отправки в Mod3
-                  const entities: string[] = [];
-                  const keyphrases: string[] = [];
-                  
-                  // Простой парсинг компонентов для извлечения терминов
-                  Object.values(layout.layout.sections).forEach((section: any) => {
-                    if (Array.isArray(section)) {
-                      section.forEach((comp: any) => {
-                        if (typeof comp === 'object' && comp.component) {
-                          const componentName = comp.component.replace('ui.', '').replace('ui-', '');
-                          entities.push(componentName);
-                        }
-                      });
-                    }
-                  });
-                  
-                  // Добавляем ключевые фразы из транскрипции
-                  if (result.text_full) {
-                    keyphrases.push(result.text_full);
-                  }
-                  
+                  console.log('🔄 Generating layout in Mod3...');
                   mod3Mapping = await mod3Client.mapEntities({
                     session_id: sessionId,
-                    entities,
-                    keyphrases,
-                    template: layout.layout.template || 'hero-main-footer'
+                    entities: entitiesResult.entities,
+                    keyphrases: entitiesResult.keyphrases || entitiesResult.entities,
+                    template: 'hero-main-footer'
                   });
-                  console.log('✅ Mapping получен от Mod3:', mod3Mapping);
+                  console.log('✅ Layout сгенерирован в Mod3:', mod3Mapping);
                   
-                  // Запускаем последовательный показ результатов
-                  setShowSequentialResults(true);
-                  setCurrentStep('mod1');
-                  console.log('🎯 Запускаем последовательный показ результатов');
+                  // Не переходим автоматически на завершение - пользователь может выбрать шаг
+                  console.log('🎯 Mod3 завершен, пользователь может выбрать шаг');
                 } catch (error) {
                   console.error('❌ Ошибка получения mapping от Mod3:', error);
                 }
               }
               
+              // Обновляем сообщение с результатами Mod2 (сущности)
               setVoiceMessages(prev => 
                 prev.map(vm => 
                   vm.sessionId === sessionId 
-                    ? { ...vm, layout, mod3Mapping }
+                    ? { ...vm, entities: entitiesResult }
                     : vm
                 )
               );
+          
+              // Обновляем шаг на Mod3 сразу после получения сущностей от Mod2
+              setCurrentStep('mod3');
+              console.log('🎯 Mod2 завершен, переходим к Mod3');
+          
+              // Обновляем сообщение с результатами Mod3 (layout)
+              if (mod3Mapping) {
+            setVoiceMessages(prev => 
+              prev.map(vm => 
+                vm.sessionId === sessionId 
+                      ? { ...vm, mod3Mapping }
+                  : vm
+              )
+            );
+                
+                // Не переходим автоматически на завершение - пользователь может выбрать шаг
+                console.log('🎯 Mod3 завершен, пользователь может выбрать шаг');
+              }
+              
             } catch (error) {
-              console.error('❌ Ошибка получения layout от Mod2:', error);
+              console.error('❌ Ошибка получения entities от Mod2:', error);
             }
           }
           
         } catch (error) {
           console.error('❌ Failed to transcribe audio via REST API:', error);
-          setVoiceMessages(prev => 
-            prev.map(vm => 
-              vm.sessionId === sessionId 
-                ? { ...vm, status: "error" }
-                : vm
-            )
-          );
+            setVoiceMessages(prev => 
+              prev.map(vm => 
+                vm.sessionId === sessionId 
+                  ? { ...vm, status: "error" }
+                  : vm
+              )
+            );
         }
       };
       
-      // Подключаемся к WebSocket для получения результатов в реальном времени
-      if (isMod1Connected) {
-        console.log('🔄 Connecting to Mod1 WebSocket...');
-        mod1Client.connectWebSocket(
-          sessionId,
-          handleMod1Message,
-          (error) => {
-            console.error('❌ WebSocket error:', error);
-            setError('Ошибка подключения к Mod1 WebSocket');
-          },
-          () => {
-            console.log('🔌 WebSocket disconnected');
-          }
-        );
-        console.log('✅ WebSocket connection initiated');
-      } else {
-        console.warn('⚠️ Mod1 not connected, skipping WebSocket connection');
-      }
+      // Mod1 не поддерживает WebSocket, используем только REST API
+      console.log('✅ Recording started, will use REST API for transcription');
       
-      mediaRecorder.start(1000); // Отправляем данные каждую секунду
-      setIsRecording(true);
-      setRecordingTime(0);
-      
-      recordingIntervalRef.current = setInterval(() => {
+        mediaRecorder.start(1000); // Отправляем данные каждую секунду
+        setIsRecording(true);
+        setRecordingTime(0);
+        
+        recordingIntervalRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
-      }, 1000);
+        }, 1000);
       
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -776,13 +763,12 @@ function SessionPage() {
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+          audioContextRef.current.close();
       }
       setAudioLevel(0);
       
-      // Отключаемся от WebSocket после завершения записи
-      console.log('🔌 Disconnecting WebSocket from stopRecording...');
-      mod1Client.disconnectWebSocket();
+      // Очищаем ресурсы после остановки записи
+      console.log('✅ Recording stopped, resources cleaned up');
     } else {
       console.warn('⚠️ Cannot stop recording - no media recorder or not recording');
     }
@@ -794,20 +780,109 @@ function SessionPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: any) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: any) => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: any) => {
     e.preventDefault();
     setIsDragOver(false);
     handleFileUpload(e.dataTransfer.files);
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textInput.trim() || !isMod2Connected) {
+      setError('Введите текст и убедитесь, что Mod2 подключен');
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      // Получаем ID проекта и сессии из URL
+      const pathParts = window.location.pathname.split('/');
+      const projectId = pathParts[2];
+      const sessionId = pathParts[4];
+      
+      if (!projectId || !sessionId) {
+        setError('Неверный URL сессии');
+        return;
+      }
+
+      console.log('🔄 Отправка текста в Mod2:', textInput);
+      
+      // Отправляем текст в Mod2
+      const chunkResult = await mod2Client.ingestChunk({
+        session_id: sessionId,
+        chunk_id: `text-chunk-${Date.now()}`,
+        seq: 1,
+        lang: 'ru-RU',
+        text: textInput.trim(),
+        overlap_prefix: ''
+      });
+
+      console.log('✅ Mod2 обработал текст:', chunkResult);
+
+      // Получаем entities (используем правильный метод)
+      const entitiesResult = await mod2Client.getSessionEntities(sessionId);
+      console.log('✅ Получены entities:', entitiesResult);
+
+      // Генерируем layout в Mod3 на основе сущностей
+      let mod3Mapping: MapResponse | undefined = undefined;
+      if (isMod3Connected && entitiesResult && entitiesResult.entities) {
+        try {
+          mod3Mapping = await mod3Client.mapEntities({
+            session_id: sessionId,
+            entities: entitiesResult.entities,
+            keyphrases: entitiesResult.keyphrases || entitiesResult.entities,
+            template: 'hero-main-footer'
+          });
+          console.log('✅ Layout сгенерирован в Mod3:', mod3Mapping);
+        } catch (error) {
+          console.error('❌ Ошибка генерации layout в Mod3:', error);
+        }
+      }
+
+      // Создаем голосовое сообщение с результатами
+      const textMessage: VoiceMessage = {
+        id: Date.now().toString(),
+        sessionId,
+        duration: 0,
+        recordedAt: new Date().toLocaleString(),
+        status: "completed",
+        transcript: textInput.trim(),
+        finalResult: {
+          session_id: sessionId,
+          text_full: textInput.trim(),
+          chunk_id: `text-chunk-${Date.now()}`,
+          confidence: 1.0,
+          language: 'ru-RU',
+          status: 'ok',
+          chunks: []
+        },
+        entities: entitiesResult,
+        mod3Mapping: mod3Mapping
+      };
+
+      setVoiceMessages(prev => [...prev, textMessage]);
+      setShowSequentialResults(true);
+      setCurrentStep('mod1');
+      
+      // Очищаем поле ввода и скрываем обе формы
+      setTextInput('');
+      setShowTextForm(false);
+      setShowVoiceForm(false);
+      
+    } catch (error: any) {
+      console.error('❌ Ошибка при отправке текста в Mod2:', error);
+      setError(`Ошибка при обработке текста: ${error.message}`);
+    }
   };
 
   return (
@@ -997,15 +1072,37 @@ function SessionPage() {
 
 
         {/* Последовательный показ результатов */}
-        {showSequentialResults && voiceMessages.some(msg => msg.finalResult) && (
+        {showSequentialResults && voiceMessages.length > 0 && (
           <Card className={`mb-8 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
             <CardHeader>
+              <div className="flex items-center justify-between">
+                        <div>
               <CardTitle className={`text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                🎯 Пошаговые результаты обработки
+                    🎯 Пошаговые результаты обработки
               </CardTitle>
               <CardDescription className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-                Последовательный просмотр результатов каждого модуля
+                    Последовательный просмотр результатов каждого модуля
               </CardDescription>
+                        </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setShowTextForm(true);
+                      setShowVoiceForm(true);
+                      setVoiceMessages([]);
+                      setShowSequentialResults(false);
+                      setCurrentStep('recording');
+                      setTextInput('');
+                    }}
+                                        variant="outline" 
+                    size="sm"
+                    className={`${isDark ? 'border-white/20 text-white hover:bg-white/10' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Начать заново
+                  </Button>
+                                    </div>
+                                  </div>
             </CardHeader>
             <CardContent>
               {/* Индикатор прогресса */}
@@ -1013,15 +1110,18 @@ function SessionPage() {
                 <div className="flex items-center justify-between mb-2">
                   {['mod1', 'mod2', 'mod3', 'complete'].map((step, index) => (
                     <div key={step} className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        currentStep === step 
-                          ? 'bg-blue-500 text-white' 
-                          : ['mod1', 'mod2', 'mod3', 'complete'].indexOf(currentStep) > index
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-300 text-gray-600'
-                      }`}>
+                      <button
+                        onClick={() => setCurrentStep(step as any)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-200 ${
+                          currentStep === step 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : ['mod1', 'mod2', 'mod3', 'complete'].indexOf(currentStep) > index
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
+                        }`}
+                      >
                         {index + 1}
-                      </div>
+                      </button>
                       {index < 3 && (
                         <div className={`w-16 h-1 mx-2 ${
                           ['mod1', 'mod2', 'mod3', 'complete'].indexOf(currentStep) > index
@@ -1054,27 +1154,49 @@ function SessionPage() {
                       </div>
                     </div>
                     
-                    {voiceMessages.filter(msg => msg.finalResult).map((message) => (
+                    {voiceMessages.map((message) => (
                       <div key={message.id} className={`p-4 rounded-lg border ${
-                        isDark ? 'bg-green-500/10 border-green-500/30' : 'bg-green-50 border-green-200'
+                        message.finalResult 
+                          ? isDark ? 'bg-green-500/10 border-green-500/30' : 'bg-green-50 border-green-200'
+                          : message.status === 'processing'
+                          ? isDark ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-50 border-blue-200'
+                          : isDark ? 'bg-gray-500/10 border-gray-500/30' : 'bg-gray-50 border-gray-200'
                       }`}>
                         <div className="space-y-3">
+                          {message.finalResult ? (
+                            <>
                           <div>
                             <h4 className="font-medium text-green-800">Транскрипция:</h4>
                             <p className="text-gray-700 mt-1">{message.transcript}</p>
                           </div>
-                          {message.finalResult && (
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
-                                <span className="font-medium">Длительность:</span>
-                                <p>{message.finalResult.duration_sec} сек</p>
+                                  <span className="font-medium">Длительность:</span>
+                                  <p>{message.finalResult.duration_sec} сек</p>
                               </div>
+                          <div>
+                                  <span className="font-medium">Чанков:</span>
+                                  <p>{message.finalResult.total_chunks}</p>
+                          </div>
+                        </div>
+                            </>
+                          ) : message.status === 'processing' ? (
+                          <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div>
+                                <h4 className="font-medium text-blue-800">Обработка аудио...</h4>
+                                <p className="text-sm text-gray-600">Отправка в Mod1 для транскрипции</p>
+                        </div>
+                      </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
                               <div>
-                                <span className="font-medium">Чанков:</span>
-                                <p>{message.finalResult.total_chunks}</p>
-                              </div>
-                            </div>
-                          )}
+                                <h4 className="font-medium text-gray-800">Ожидание...</h4>
+                                <p className="text-sm text-gray-600">Подготовка к обработке</p>
+                        </div>
+                      </div>
+                    )}
                         </div>
                       </div>
                     ))}
@@ -1102,30 +1224,58 @@ function SessionPage() {
                       </div>
                     </div>
                     
-                    {voiceMessages.filter(msg => msg.layout).map((message) => (
+                    {voiceMessages.map((message) => (
                       <div key={message.id} className={`p-4 rounded-lg border ${
-                        isDark ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-200'
+                        message.entities 
+                          ? isDark ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-200'
+                          : message.finalResult && !message.entities
+                          ? isDark ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-50 border-blue-200'
+                          : isDark ? 'bg-gray-500/10 border-gray-500/30' : 'bg-gray-50 border-gray-200'
                       }`}>
                         <div className="space-y-3">
-                          <div>
-                            <h4 className="font-medium text-purple-800">Layout шаблон:</h4>
-                            <p className="text-gray-700 mt-1 font-mono">{message.layout?.layout.template}</p>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-purple-800">Секции и компоненты:</h4>
-                            <div className="mt-2 space-y-2">
-                              {Object.entries(message.layout?.layout.sections || {}).map(([section, components]) => (
-                                <div key={section} className="p-2 bg-white rounded border">
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-medium capitalize">{section}</span>
-                                    <Badge variant="outline">
-                                      {Array.isArray(components) ? components.length : 0} компонентов
-                                    </Badge>
-                                  </div>
+                          {message.entities ? (
+                            <>
+                              <div>
+                                <h4 className={`font-semibold text-lg ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>
+                                  Ключевые фразы:
+                                </h4>
+                                <div className="mt-3 space-y-2">
+                                  {message.entities?.keyphrases?.map((phrase: string, index: number) => (
+                                    <div key={index} className={`flex items-center gap-3 p-3 rounded-lg border ${
+                                      isDark 
+                                        ? 'bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20' 
+                                        : 'bg-purple-50 border-purple-200 hover:bg-purple-100'
+                                    } transition-colors duration-200`}>
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                        isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-200 text-purple-700'
+                                      }`}>
+                                        {index + 1}
+                                      </div>
+                                      <span className={`font-medium ${isDark ? 'text-purple-200' : 'text-purple-800'}`}>
+                                        {phrase}
+                                      </span>
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              </div>
+                            </>
+                          ) : message.finalResult && !message.entities ? (
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                              <div>
+                                <h4 className="font-medium text-blue-800">Обработка NLP...</h4>
+                                <p className="text-sm text-gray-600">Отправка в Mod2 для анализа текста</p>
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
+                              <div>
+                                <h4 className="font-medium text-gray-800">Ожидание...</h4>
+                                <p className="text-sm text-gray-600">Ожидание завершения транскрипции</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1159,40 +1309,81 @@ function SessionPage() {
                       </div>
                     </div>
                     
-                    {voiceMessages.filter(msg => msg.mod3Mapping).map((message) => (
+                    {voiceMessages.map((message) => (
                       <div key={message.id} className={`p-4 rounded-lg border ${
-                        isDark ? 'bg-orange-500/10 border-orange-500/30' : 'bg-orange-50 border-orange-200'
+                        message.mod3Mapping 
+                          ? isDark ? 'bg-orange-500/10 border-orange-500/30' : 'bg-orange-50 border-orange-200'
+                          : message.entities && !message.mod3Mapping
+                          ? isDark ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-50 border-blue-200'
+                          : isDark ? 'bg-gray-500/10 border-gray-500/30' : 'bg-gray-50 border-gray-200'
                       }`}>
                         <div className="space-y-3">
-                          <div>
-                            <h4 className="font-medium text-orange-800">Сопоставления:</h4>
-                            <div className="mt-2 space-y-2">
-                              {message.mod3Mapping?.matches?.map((match: ComponentMatch, index: number) => (
-                                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{match.term}</span>
-                                    <span>→</span>
-                                    <span className="font-mono text-sm">{match.component}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge 
-                                      variant="outline"
-                                      className={`text-xs ${
-                                        match.match_type === 'exact' ? 'border-green-500 text-green-600' :
-                                        match.match_type === 'fuzzy' ? 'border-yellow-500 text-yellow-600' :
-                                        'border-gray-500 text-gray-600'
-                                      }`}
-                                    >
-                                      {match.match_type}
-                                    </Badge>
-                                    <span className="text-xs text-gray-500">
-                                      {(match.confidence * 100).toFixed(0)}%
-                                    </span>
-                                  </div>
+                          {message.mod3Mapping ? (
+                            <>
+                              <div>
+                                <h4 className={`font-semibold text-lg ${isDark ? 'text-orange-300' : 'text-orange-800'}`}>
+                                  Сопоставления:
+                                </h4>
+                                <div className="mt-3 space-y-2">
+                                  {message.mod3Mapping?.matches?.map((match: ComponentMatch, index: number) => (
+                                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${
+                                      isDark 
+                                        ? 'bg-orange-500/10 border-orange-400/30 hover:bg-orange-500/20' 
+                                        : 'bg-orange-50 border-orange-200 hover:bg-orange-100'
+                                    } transition-colors duration-200`}>
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                          isDark ? 'bg-orange-500/20 text-orange-300' : 'bg-orange-200 text-orange-700'
+                                        }`}>
+                                          {index + 1}
+                                        </div>
+                                        <span className={`font-medium ${isDark ? 'text-orange-200' : 'text-orange-800'}`}>
+                                          {match.term}
+                                        </span>
+                                        <span className={`text-lg ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>→</span>
+                                        <span className={`font-mono text-sm ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>
+                                          {match.component}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge 
+                                          variant="outline"
+                                          className={`text-xs ${
+                                            match.match_type === 'exact' 
+                                              ? isDark ? 'border-green-400 text-green-300' : 'border-green-500 text-green-600'
+                                              : match.match_type === 'fuzzy' 
+                                              ? isDark ? 'border-yellow-400 text-yellow-300' : 'border-yellow-500 text-yellow-600'
+                                              : isDark ? 'border-gray-400 text-gray-300' : 'border-gray-500 text-gray-600'
+                                          }`}
+                                        >
+                                          {match.match_type}
+                                        </Badge>
+                                        <span className={`text-xs ${isDark ? 'text-orange-300' : 'text-orange-600'}`}>
+                                          {(match.confidence * 100).toFixed(0)}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              </div>
+                            </>
+                          ) : message.entities && !message.mod3Mapping ? (
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                              <div>
+                                <h4 className={`font-medium ${isDark ? 'text-orange-300' : 'text-orange-800'}`}>Визуальный маппинг...</h4>
+                                <p className={`text-sm ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>Отправка в Mod3 для сопоставления компонентов</p>
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-400'}`}></div>
+                              <div>
+                                <h4 className={`font-medium ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>Ожидание...</h4>
+                                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Ожидание завершения NLP анализа</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1238,7 +1429,10 @@ function SessionPage() {
                         </p>
                         <div className="flex justify-center gap-4">
                           <Button 
-                            onClick={() => setShowPageBuilder(true)}
+                            onClick={() => {
+                              // Переходим на отдельную страницу конструктора
+                              window.location.href = `/builder/${sessionId}`;
+                            }}
                             className="bg-green-500 hover:bg-green-600 text-white"
                           >
                             🎨 Открыть конструктор страниц
@@ -1300,128 +1494,89 @@ function SessionPage() {
                   }}
                   className="h-full"
                 />
-              </div>
+                        </div>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* File Upload Section */}
+          {/* Text Input Section */}
+          {showTextForm && (
           <Card className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
             <CardHeader>
               <CardTitle className={`text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Загрузка файлов
+                Текстовый анализ
               </CardTitle>
               <CardDescription className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-                Загрузите PDF и DOCX документы
+                Отправляйте текст для NLP обработки в Mod2
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  isDragOver
+              <div className="text-center space-y-6">
+                {/* Большой круглый элемент как в голосовых записях */}
+                <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center ${
+                  isMod2Connected
                     ? isDark
-                      ? 'border-purple-400 bg-purple-500/10'
-                      : 'border-purple-300 bg-purple-50'
+                      ? 'bg-white/10 border-2 border-white/20'
+                      : 'bg-gray-100 border-2 border-gray-300'
                     : isDark
-                    ? 'border-white/20 hover:border-white/40'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <Upload className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-                <p className={`text-lg mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Перетащите файлы сюда или
-                </p>
-                <Button
-                  onClick={() => document.getElementById('file-input')?.click()}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white disabled:opacity-50"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {loading ? 'Загрузка...' : 'Выбрать файлы'}
-                </Button>
-                <input
-                  id="file-input"
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleFileUpload(e.target.files)}
-                  accept=".pdf,.docx"
-                />
-                <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Поддерживаются: PDF, DOCX
-                </p>
+                    ? 'bg-red-500/20 border-2 border-red-500'
+                    : 'bg-red-100 border-2 border-red-300'
+                }`}>
+                  <FileText className="w-8 h-8 text-purple-500" />
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Textarea */}
+                  <div className="max-w-md mx-auto">
+                    <textarea
+                      placeholder="Введите текст для тестирования Mod2 (например: 'сделай заголовок и кнопку отправки формы')"
+                      value={textInput}
+                      onChange={(e) => setTextInput(e.target.value)}
+                      className={`w-full p-3 border rounded-md ${
+                        isDark ? 'bg-white/5 border-white/20 text-white placeholder-gray-400' : 
+                        'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500'
+                      } min-h-[100px] resize-none`}
+                      disabled={!isMod2Connected}
+                    />
               </div>
 
-              {uploadedFiles.length > 0 && (
-                <div className="mt-6 space-y-3">
-                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Загруженные файлы
-                  </h3>
-                  {uploadedFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 hover:border-white/20'
-                          : 'bg-gray-50 border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {getFileIcon(file.type)}
-                        <div>
-                          <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {file.name}
-                          </p>
-                          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {file.size} • {file.uploadedAt}
-                          </p>
+                  {/* Инструкция */}
+                  <div className={`text-sm p-3 rounded ${
+                    isDark ? 'bg-purple-500/10 border border-purple-500/30 text-purple-300' : 
+                    'bg-purple-50 border border-purple-200 text-purple-600'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4" />
+                      <span className="font-medium">Инструкция по использованию:</span>
                         </div>
+                    <ul className="text-xs space-y-1 ml-6">
+                      <li>• Опишите желаемый интерфейс текстом</li>
+                      <li>• Используйте русский язык</li>
+                      <li>• Будьте конкретными в описании</li>
+                      <li>• Mod2 извлечет сущности и ключевые фразы</li>
+                    </ul>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          className={
-                            file.status === 'completed'
-                              ? isDark 
-                                ? 'bg-green-500/20 text-green-300 border-green-500/30'
-                                : 'bg-green-100 text-green-700 border-green-200'
-                              : file.status === 'error'
-                              ? isDark
-                                ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                : 'bg-red-100 text-red-700 border-red-200'
-                              : isDark
-                                ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-                                : 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                          }
-                        >
-                          {file.status === 'completed' && <CheckCircle className="w-3 h-3 mr-1" />}
-                          {file.status === 'error' && <AlertCircle className="w-3 h-3 mr-1" />}
-                          {file.status === 'uploading' && <Clock className="w-3 h-3 mr-1" />}
-                          {file.status === 'processing' && <RotateCcw className="w-3 h-3 mr-1 animate-spin" />}
-                          {file.status === 'completed' ? 'Готово' : 
-                           file.status === 'error' ? 'Ошибка' :
-                           file.status === 'uploading' ? 'Загрузка' : 'Обработка'}
-                        </Badge>
+                  
+                  {/* Кнопка отправки */}
+                  <div className="flex justify-center">
                         <Button
-                          size="sm"
-                          variant="outline"
-                          className={`${isDark ? 'border-red-400/50 text-red-300 hover:bg-red-500/10' : 'border-red-300 text-red-600 hover:bg-red-50'}`}
-                          onClick={() => setUploadedFiles(prev => prev.filter(f => f.id !== file.id))}
-                        >
-                          <Trash2 className="w-4 h-4" />
+                      onClick={handleTextSubmit}
+                      disabled={!isMod2Connected || !textInput.trim()}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {isMod2Connected ? 'Отправить в Mod2' : 'Mod2 недоступен'}
                         </Button>
                       </div>
                     </div>
-                  ))}
                 </div>
-              )}
             </CardContent>
           </Card>
+          )}
 
           {/* Voice Recording Section */}
+          {showVoiceForm && (
           <Card className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
             <CardHeader>
               <CardTitle className={`text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -1665,7 +1820,7 @@ function SessionPage() {
                                   <p className={`font-medium ${isDark ? 'text-purple-200' : 'text-purple-600'}`}>
                                     Компоненты по секциям:
                                   </p>
-                                  {Object.entries(message.layout.layout.sections).map(([section, components]) => (
+                                  {message.layout?.layout?.sections && Object.entries(message.layout.layout.sections).map(([section, components]) => (
                                     <div key={section} className={`text-xs p-2 rounded ${
                                       isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'
                                     }`}>
@@ -1696,7 +1851,8 @@ function SessionPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+          )}
+            </div>
       </div>
     </div>
   );

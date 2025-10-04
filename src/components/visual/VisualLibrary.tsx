@@ -891,7 +891,7 @@ export const renderPage = (layout: PageLayout): React.ReactElement => {
         </head>
       )}
       
-      {Object.entries(sections).map(([sectionName, components]) => 
+      {sections && Object.entries(sections).map(([sectionName, components]) => 
         renderSection(sectionName, components)
       )}
     </div>
@@ -914,7 +914,7 @@ export const convertMod3ToPageLayout = (mod3Data: MapResponse): PageLayout => {
   // Конвертируем секции
   const convertedSections: { [key: string]: VisualComponent[] } = {};
   
-  Object.entries(layout.sections).forEach(([sectionName, components]) => {
+  Object.entries(layout.sections || {}).forEach(([sectionName, components]) => {
     convertedSections[sectionName] = components.map((comp: any, index: number) => {
       const componentInfo = componentMap.get(comp.component);
       

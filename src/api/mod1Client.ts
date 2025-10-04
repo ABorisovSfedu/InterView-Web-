@@ -16,12 +16,13 @@ export interface TranscribeRequest {
 }
 
 export interface TranscribeResponse {
+  status: string;
   session_id: string;
+  chunk_id: string;
   text_full: string;
-  lang: string;
-  duration_sec: number;
-  total_chunks: number;
-  chunks?: any[];
+  confidence: number;
+  language: string;
+  chunks: any[];
 }
 
 export interface ChunkData {

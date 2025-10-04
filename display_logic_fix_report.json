@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-01-31T13:15:00Z",
+  "issue": "Результаты Mod2 отображаются как результаты Mod3 в пошаговом результате",
+  "root_cause": "Дублирование условий в логике отображения результатов",
+  "details": {
+    "problem": "Два одинаковых условия message.entities && !message.mod3Mapping",
+    "result": "Результаты Mod2 показывались в неправильном блоке",
+    "display_logic": "Неправильная последовательность условий if-else"
+  },
+  "fixes_applied": [
+    {
+      "file": "src/components/SessionPage.tsx",
+      "change": "Исправлена логика отображения результатов",
+      "before": "Дублирующие условия для message.entities && !message.mod3Mapping",
+      "after": "Правильная последовательность: mod3Mapping → entities → entities+processing → waiting"
+    }
+  ],
+  "correct_display_logic": {
+    "mod3Mapping_exists": "Показать результаты Mod3 (layout и сопоставления)",
+    "entities_exists_no_mod3Mapping": "Показать результаты Mod2 (сущности и ключевые фразы)",
+    "entities_exists_processing": "Показать состояние 'Визуальный маппинг...'",
+    "no_data": "Показать состояние 'Ожидание...'"
+  },
+  "expected_behavior": {
+    "step_1": "Mod1: Транскрипция",
+    "step_2": "Mod2: Извлеченные сущности и ключевые фразы",
+    "step_3": "Mod3: Сопоставления и layout",
+    "step_4": "Завершение: Финальный результат"
+  },
+  "verification": {
+    "mod2_results": "Should display entities and keyphrases correctly",
+    "mod3_results": "Should display layout and mappings correctly",
+    "processing_states": "Should show correct processing indicators",
+    "no_duplication": "No duplicate conditions in display logic"
+  }
+}
