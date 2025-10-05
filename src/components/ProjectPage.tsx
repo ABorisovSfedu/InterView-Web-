@@ -440,14 +440,6 @@ function ProjectPage() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-3">
-        <Button
-          onClick={() => window.location.href = '/builder/new'}
-          variant="outline"
-          className="border-blue-500 text-blue-600 hover:bg-blue-50"
-        >
-          <Layout className="w-4 h-4 mr-2" />
-          Ручной конструктор
-        </Button>
                     <Button
                       onClick={async () => {
                         if (!project) {

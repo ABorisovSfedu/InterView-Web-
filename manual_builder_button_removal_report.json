@@ -1,0 +1,70 @@
+{
+  "title": "Удалена кнопка 'Ручной конструктор'",
+  "date": "2025-01-15",
+  "feature": "Удаление кнопки ручного конструктора со страницы сессий проекта",
+  "description": "Убрана кнопка 'Ручной конструктор' с страницы проекта для упрощения интерфейса",
+  "location": {
+    "file": "src/components/ProjectPage.tsx",
+    "line": "443-450",
+    "component": "CardHeader в секции 'Сессии проекта'"
+  },
+  "removed_code": {
+    "button": {
+      "text": "Ручной конструктор",
+      "icon": "Layout",
+      "onClick": "window.location.href = '/builder/new'",
+      "variant": "outline",
+      "className": "border-blue-500 text-blue-600 hover:bg-blue-50"
+    },
+    "full_code": `<Button
+  onClick={() => window.location.href = '/builder/new'}
+  variant="outline"
+  className="border-blue-500 text-blue-600 hover:bg-blue-50"
+>
+  <Layout className="w-4 h-4 mr-2" />
+  Ручной конструктор
+</Button>`
+  },
+  "context": {
+    "section": "Сессии проекта",
+    "description": "Управление интервью и импортированными материалами",
+    "remaining_buttons": [
+      "Создать новую сессию",
+      "Другие кнопки управления"
+    ]
+  },
+  "reasoning": {
+    "user_request": "Убрать кнопку ручной конструктор со страницы сессий",
+    "benefits": [
+      "Упрощение интерфейса",
+      "Уменьшение количества опций",
+      "Фокус на основных функциях"
+    ]
+  },
+  "impact": {
+    "navigation": {
+      "before": "Пользователь мог перейти к ручному конструктору",
+      "after": "Пользователь может создавать только сессии"
+    },
+    "workflow": {
+      "simplified": "Меньше опций = проще выбор",
+      "focused": "Фокус на создании сессий"
+    }
+  },
+  "alternative_access": {
+    "manual_builder": "Доступ через другие страницы или прямые ссылки",
+    "sessions": "Основной путь через создание сессий"
+  },
+  "ui_changes": {
+    "before": "Две кнопки в заголовке секции",
+    "after": "Одна кнопка 'Создать новую сессию'",
+    "layout": "Упрощенный интерфейс"
+  },
+  "testing": {
+    "verification": "Кнопка больше не отображается на странице проекта",
+    "functionality": "Остальные функции работают корректно",
+    "navigation": "Переходы между страницами не нарушены"
+  },
+  "status": "completed",
+  "result": "Кнопка 'Ручной конструктор' успешно удалена со страницы сессий проекта"
+}

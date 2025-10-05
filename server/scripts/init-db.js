@@ -67,10 +67,24 @@ async function initDatabase() {
       )
     `);
 
+    // Создаем таблицу для сохранения layout сессий
+    await dbRun(`
+      CREATE TABLE IF NOT EXISTS session_layouts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id INTEGER NOT NULL UNIQUE,
+        elements TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE
+      )
+    `);
+
     // Создаем индексы для оптимизации запросов
     await dbRun('CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_sessions_project_id ON sessions(project_id)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_uploaded_files_project_id ON uploaded_files(project_id)');
+    await dbRun('CREATE INDEX IF NOT EXISTS idx_session_layouts_session_id ON session_layouts(session_id)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
 
     // Создаем триггеры для автоматического обновления updated_at
@@ -99,7 +113,7 @@ async function initDatabase() {
     `);
 
     console.log('✅ База данных успешно инициализирована!');
-    console.log('📊 Созданы таблицы: users, projects, sessions, uploaded_files');
+    console.log('📊 Созданы таблицы: users, projects, sessions, uploaded_files, session_layouts');
     console.log('🔍 Созданы индексы и триггеры для оптимизации');
 
   } catch (error) {

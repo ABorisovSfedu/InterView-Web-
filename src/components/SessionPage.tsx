@@ -99,9 +99,14 @@ function SessionPage() {
   const [currentStep, setCurrentStep] = useState('recording' as 'recording' | 'mod1' | 'mod2' | 'mod3' | 'complete');
   const [showSequentialResults, setShowSequentialResults] = useState(false);
   
-  // Получаем sessionId из URL
+  // Получаем projectId и sessionId из URL
   const pathParts = window.location.pathname.split('/');
-  const sessionId = pathParts[4];
+  const projectId = pathParts[2]; // /projects/{projectId}/sessions/{sessionId}
+  const sessionId = pathParts[4]; // /projects/{projectId}/sessions/{sessionId}
+  
+  console.log('🔍 SessionPage URL parts:', pathParts);
+  console.log('📁 ProjectId:', projectId);
+  console.log('🆔 SessionId:', sessionId);
   
   const mediaRecorderRef = useRef(null as MediaRecorder | null);
   const recordingIntervalRef = useRef(null as NodeJS.Timeout | null);
@@ -1113,9 +1118,9 @@ function SessionPage() {
                       <button
                         onClick={() => setCurrentStep(step as any)}
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-200 ${
-                          currentStep === step 
+                        currentStep === step 
                             ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                            : ['mod1', 'mod2', 'mod3', 'complete'].indexOf(currentStep) > index
+                          : ['mod1', 'mod2', 'mod3', 'complete'].indexOf(currentStep) > index
                             ? 'bg-green-500 text-white hover:bg-green-600'
                             : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
                         }`}
@@ -1235,7 +1240,7 @@ function SessionPage() {
                         <div className="space-y-3">
                           {message.entities ? (
                             <>
-                              <div>
+                          <div>
                                 <h4 className={`font-semibold text-lg ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>
                                   Ключевые фразы:
                                 </h4>
@@ -1250,32 +1255,32 @@ function SessionPage() {
                                         isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-200 text-purple-700'
                                       }`}>
                                         {index + 1}
-                                      </div>
+                          </div>
                                       <span className={`font-medium ${isDark ? 'text-purple-200' : 'text-purple-800'}`}>
                                         {phrase}
                                       </span>
-                                    </div>
-                                  ))}
                                 </div>
-                              </div>
+                              ))}
+                            </div>
+                          </div>
                             </>
                           ) : message.finalResult && !message.entities ? (
-                            <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                              <div>
+                          <div>
                                 <h4 className="font-medium text-blue-800">Обработка NLP...</h4>
                                 <p className="text-sm text-gray-600">Отправка в Mod2 для анализа текста</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
+                        </div>
+                      </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
                               <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
                               <div>
                                 <h4 className="font-medium text-gray-800">Ожидание...</h4>
                                 <p className="text-sm text-gray-600">Ожидание завершения транскрипции</p>
-                              </div>
-                            </div>
-                          )}
+                        </div>
+                      </div>
+                    )}
                         </div>
                       </div>
                     ))}
@@ -1320,12 +1325,12 @@ function SessionPage() {
                         <div className="space-y-3">
                           {message.mod3Mapping ? (
                             <>
-                              <div>
+                          <div>
                                 <h4 className={`font-semibold text-lg ${isDark ? 'text-orange-300' : 'text-orange-800'}`}>
                                   Сопоставления:
                                 </h4>
                                 <div className="mt-3 space-y-2">
-                                  {message.mod3Mapping?.matches?.map((match: ComponentMatch, index: number) => (
+                              {message.mod3Mapping?.matches?.map((match: ComponentMatch, index: number) => (
                                     <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${
                                       isDark 
                                         ? 'bg-orange-500/10 border-orange-400/30 hover:bg-orange-500/20' 
@@ -1344,46 +1349,46 @@ function SessionPage() {
                                         <span className={`font-mono text-sm ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>
                                           {match.component}
                                         </span>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Badge 
-                                          variant="outline"
-                                          className={`text-xs ${
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      variant="outline"
+                                      className={`text-xs ${
                                             match.match_type === 'exact' 
                                               ? isDark ? 'border-green-400 text-green-300' : 'border-green-500 text-green-600'
                                               : match.match_type === 'fuzzy' 
                                               ? isDark ? 'border-yellow-400 text-yellow-300' : 'border-yellow-500 text-yellow-600'
                                               : isDark ? 'border-gray-400 text-gray-300' : 'border-gray-500 text-gray-600'
-                                          }`}
-                                        >
-                                          {match.match_type}
-                                        </Badge>
+                                      }`}
+                                    >
+                                      {match.match_type}
+                                    </Badge>
                                         <span className={`text-xs ${isDark ? 'text-orange-300' : 'text-orange-600'}`}>
-                                          {(match.confidence * 100).toFixed(0)}%
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
+                                      {(match.confidence * 100).toFixed(0)}%
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
+                              ))}
+                            </div>
+                          </div>
                             </>
                           ) : message.entities && !message.mod3Mapping ? (
-                            <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                               <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                              <div>
+                          <div>
                                 <h4 className={`font-medium ${isDark ? 'text-orange-300' : 'text-orange-800'}`}>Визуальный маппинг...</h4>
                                 <p className={`text-sm ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>Отправка в Mod3 для сопоставления компонентов</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
+                        </div>
+                      </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
                               <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-400'}`}></div>
                               <div>
                                 <h4 className={`font-medium ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>Ожидание...</h4>
                                 <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Ожидание завершения NLP анализа</p>
-                              </div>
-                            </div>
-                          )}
+                        </div>
+                      </div>
+                    )}
                         </div>
                       </div>
                     ))}
@@ -1430,8 +1435,26 @@ function SessionPage() {
                         <div className="flex justify-center gap-4">
                           <Button 
                             onClick={() => {
+                              console.log('🎨 Кнопка "Открыть конструктор страниц" нажата');
+                              console.log('🆔 SessionId для перехода:', sessionId);
+                              
+                              if (!sessionId) {
+                                console.error('❌ SessionId не определен!');
+                                alert('Ошибка: не удалось определить ID сессии');
+                                return;
+                              }
+                              
+                              // Сохраняем данные Mod3 в localStorage для передачи в редактор
+                              const currentMessage = voiceMessages.find(vm => vm.sessionId === sessionId);
+                              if (currentMessage?.mod3Mapping) {
+                                localStorage.setItem(`mod3_layout_${sessionId}`, JSON.stringify(currentMessage.mod3Mapping));
+                                console.log('💾 Данные Mod3 сохранены в localStorage');
+                              }
+                              
                               // Переходим на отдельную страницу конструктора
-                              window.location.href = `/builder/${sessionId}`;
+                              const builderUrl = `/builder/${projectId}/${sessionId}`;
+                              console.log('🔗 Переходим на:', builderUrl);
+                              window.location.href = builderUrl;
                             }}
                             className="bg-green-500 hover:bg-green-600 text-white"
                           >

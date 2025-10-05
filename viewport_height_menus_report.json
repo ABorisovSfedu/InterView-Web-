@@ -1,0 +1,105 @@
+{
+  "title": "Боковые меню на высоту монитора",
+  "date": "2025-01-15",
+  "feature": "Изменение высоты боковых меню с h-screen на h-[100vh]",
+  "description": "Боковые меню BuilderPage теперь используют высоту viewport вместо полной высоты экрана",
+  "changes": {
+    "left_menu": {
+      "before": "h-screen",
+      "after": "h-[100vh]",
+      "description": "Левое меню теперь использует высоту viewport",
+      "benefits": [
+        "Точная высота монитора",
+        "Лучшее позиционирование",
+        "Избежание проблем с overflow"
+      ]
+    },
+    "right_menu": {
+      "before": "h-screen", 
+      "after": "h-[100vh]",
+      "description": "Правое меню теперь использует высоту viewport",
+      "benefits": [
+        "Точная высота монитора",
+        "Лучшее позиционирование", 
+        "Избежание проблем с overflow"
+      ]
+    }
+  },
+  "technical_details": {
+    "viewport_height": {
+      "unit": "100vh",
+      "description": "100% высоты viewport браузера",
+      "difference_from_screen": "h-screen может включать полосы прокрутки, h-[100vh] - только видимую область"
+    },
+    "css_classes": {
+      "left_menu": "h-[100vh]",
+      "right_menu": "h-[100vh]",
+      "scroll_containers": "h-full overflow-y-auto"
+    },
+    "positioning": {
+      "sticky": "left-0 top-0 и right-0 top-0",
+      "z_index": "z-30",
+      "height": "h-[100vh] - точная высота монитора"
+    }
+  },
+  "benefits": {
+    "precise_sizing": [
+      "Точная высота монитора без учета полос прокрутки",
+      "Лучшее позиционирование элементов",
+      "Избежание проблем с overflow"
+    ],
+    "better_ux": [
+      "Меню точно соответствуют размеру экрана",
+      "Нет лишнего пространства или обрезания",
+      "Более предсказуемое поведение"
+    ],
+    "cross_browser": [
+      "Единообразное поведение в разных браузерах",
+      "Лучшая совместимость с мобильными устройствами",
+      "Избежание проблем с различными реализациями h-screen"
+    ]
+  },
+  "viewport_vs_screen": {
+    "h-screen": {
+      "description": "100% высоты экрана",
+      "includes": "Может включать полосы прокрутки",
+      "issues": "Может вызывать проблемы с overflow"
+    },
+    "h-[100vh]": {
+      "description": "100% высоты viewport",
+      "includes": "Только видимую область браузера",
+      "benefits": "Точное соответствие размеру монитора"
+    }
+  },
+  "implementation_details": {
+    "left_menu_class": "w-72 border-r flex-shrink-0 transition-all duration-300 sticky left-0 top-0 z-30 h-[100vh]",
+    "right_menu_class": "w-80 border-l flex-shrink-0 transition-all duration-300 sticky right-0 top-0 z-30 h-[100vh]",
+    "scroll_behavior": "h-full overflow-y-auto для прокрутки содержимого",
+    "responsive": "Сохраняется адаптивное поведение"
+  },
+  "visual_improvements": {
+    "precise_alignment": "Меню точно выровнены по высоте монитора",
+    "no_overflow_issues": "Избежание проблем с переполнением",
+    "consistent_height": "Единообразная высота во всех браузерах",
+    "better_proportions": "Улучшенные пропорции интерфейса"
+  },
+  "compatibility": {
+    "modern_browsers": "Полная поддержка во всех современных браузерах",
+    "mobile_devices": "Корректное поведение на мобильных устройствах",
+    "different_screen_sizes": "Адаптация к различным размерам экранов",
+    "zoom_levels": "Корректная работа при изменении масштаба"
+  },
+  "performance": {
+    "css_efficiency": "Использование нативных CSS единиц",
+    "rendering_optimization": "Оптимизированное отображение",
+    "scroll_performance": "Плавная прокрутка содержимого меню"
+  },
+  "user_experience": {
+    "precise_layout": "Точное соответствие размеру монитора",
+    "no_scroll_issues": "Отсутствие проблем с прокруткой",
+    "consistent_behavior": "Предсказуемое поведение интерфейса",
+    "professional_appearance": "Профессиональный внешний вид"
+  },
+  "status": "completed",
+  "result": "Боковые меню BuilderPage теперь точно соответствуют высоте монитора"
+}

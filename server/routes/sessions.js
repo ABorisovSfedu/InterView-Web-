@@ -296,4 +296,127 @@ router.get('/:sessionId/files', authenticateToken, async (req, res) => {
   }
 });
 
+// Сохранить layout сессии
+router.post('/:sessionId/layout', authenticateToken, async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.sessionId);
+    
+    if (!session) {
+      return res.status(404).json({
+        error: 'Сессия не найдена'
+      });
+    }
+
+    if (!(await session.checkAccess(req.user.id))) {
+      return res.status(403).json({
+        error: 'Нет доступа к этой сессии'
+      });
+    }
+
+    const { elements, timestamp } = req.body;
+    
+    if (!elements || !Array.isArray(elements)) {
+      return res.status(400).json({
+        error: 'Элементы layout обязательны и должны быть массивом'
+      });
+    }
+
+    // Сохраняем layout в базу данных
+    const layoutData = {
+      sessionId: req.params.sessionId,
+      elements: elements,
+      timestamp: timestamp || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Проверяем, есть ли уже layout для этой сессии
+    const existingLayout = await dbRun(`
+      SELECT id FROM session_layouts WHERE session_id = ?
+    `, [req.params.sessionId]);
+
+    if (existingLayout) {
+      // Обновляем существующий layout
+      await dbRun(`
+        UPDATE session_layouts 
+        SET elements = ?, timestamp = ?, updated_at = ?
+        WHERE session_id = ?
+      `, [
+        JSON.stringify(elements),
+        layoutData.timestamp,
+        layoutData.updatedAt,
+        req.params.sessionId
+      ]);
+    } else {
+      // Создаем новый layout
+      await dbRun(`
+        INSERT INTO session_layouts (session_id, elements, timestamp, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+      `, [
+        req.params.sessionId,
+        JSON.stringify(elements),
+        layoutData.timestamp,
+        layoutData.updatedAt,
+        layoutData.updatedAt
+      ]);
+    }
+
+    res.json({
+      message: 'Layout успешно сохранен',
+      layout: layoutData
+    });
+  } catch (error) {
+    console.error('Ошибка сохранения layout:', error);
+    res.status(500).json({
+      error: 'Внутренняя ошибка сервера'
+    });
+  }
+});
+
+// Загрузить layout сессии
+router.get('/:sessionId/layout', authenticateToken, async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.sessionId);
+    
+    if (!session) {
+      return res.status(404).json({
+        error: 'Сессия не найдена'
+      });
+    }
+
+    if (!(await session.checkAccess(req.user.id))) {
+      return res.status(403).json({
+        error: 'Нет доступа к этой сессии'
+      });
+    }
+
+    // Получаем layout из базы данных
+    const layout = await dbRun(`
+      SELECT elements, timestamp, created_at, updated_at 
+      FROM session_layouts 
+      WHERE session_id = ?
+    `, [req.params.sessionId]);
+
+    if (!layout) {
+      return res.status(404).json({
+        error: 'Layout не найден для этой сессии'
+      });
+    }
+
+    const layoutData = {
+      sessionId: req.params.sessionId,
+      elements: JSON.parse(layout.elements),
+      timestamp: layout.timestamp,
+      createdAt: layout.created_at,
+      updatedAt: layout.updated_at
+    };
+
+    res.json(layoutData);
+  } catch (error) {
+    console.error('Ошибка загрузки layout:', error);
+    res.status(500).json({
+      error: 'Внутренняя ошибка сервера'
+    });
+  }
+});
+
 module.exports = router;

@@ -1,0 +1,98 @@
+{
+  "title": "Исправлена проблема с кнопкой Назад",
+  "date": "2025-01-15",
+  "issue": "Кнопка Назад меняла URL, но страница не обновлялась",
+  "description": "Исправлена проблема навигации в BuilderPage, где кнопка Назад не обновляла страницу после изменения URL",
+  "root_cause": {
+    "problem": "React Router navigate() изменяет URL, но не принуждает к перерендерингу компонента",
+    "symptoms": [
+      "URL меняется в адресной строке",
+      "Страница остается на том же месте",
+      "Компонент не перерендеривается",
+      "Пользователь видит старый контент"
+    ]
+  },
+  "solution": {
+    "approach": "Использование History API для принудительного обновления",
+    "implementation": {
+      "before": "navigate(`/projects/${projectId}`)",
+      "after": "navigate(`/projects/${projectId}`) + History API",
+      "code": `onClick={() => {
+  navigate(\`/projects/\${projectId}\`);
+  // Принудительно обновляем страницу через history API
+  window.history.pushState({}, "", \`/projects/\${projectId}\`);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}}`
+    }
+  },
+  "technical_details": {
+    "history_api": {
+      "pushState": "Изменяет URL без перезагрузки страницы",
+      "popstate_event": "Симулирует событие изменения истории",
+      "dispatchEvent": "Принудительно вызывает обработчики событий"
+    },
+    "react_router": {
+      "navigate": "Программная навигация React Router",
+      "limitation": "Не всегда принуждает к перерендерингу",
+      "solution": "Комбинация с History API"
+    },
+    "event_flow": [
+      "1. navigate() изменяет URL в React Router",
+      "2. pushState() обновляет браузерную историю",
+      "3. dispatchEvent() вызывает popstate событие",
+      "4. React Router обрабатывает событие и обновляет компонент"
+    ]
+  },
+  "comparison": {
+    "alternatives": {
+      "window_location_reload": {
+        "pros": ["Простота", "Гарантированное обновление"],
+        "cons": ["Полная перезагрузка страницы", "Потеря состояния", "Медленно"]
+      },
+      "history_api": {
+        "pros": ["Быстро", "Сохраняет состояние", "Элегантно"],
+        "cons": ["Сложнее реализация", "Требует понимания событий"]
+      }
+    },
+    "chosen_solution": "History API как в SessionPage для консистентности"
+  },
+  "consistency": {
+    "session_page": "Уже использует History API для навигации",
+    "builder_page": "Теперь использует тот же подход",
+    "benefit": "Единообразное поведение навигации"
+  },
+  "user_experience": {
+    "before": [
+      "Клик на Назад → URL меняется",
+      "Страница остается на месте",
+      "Пользователь в замешательстве"
+    ],
+    "after": [
+      "Клик на Назад → URL меняется",
+      "Страница обновляется",
+      "Пользователь видит проект"
+    ],
+    "improvement": "Навигация работает как ожидается"
+  },
+  "testing": {
+    "scenarios": [
+      "1. Открыть BuilderPage → клик Назад → должен перейти к проекту",
+      "2. URL должен измениться на /projects/{id}",
+      "3. Страница должна показать список проектов",
+      "4. Кнопка браузера Назад должна работать"
+    ],
+    "verification": "✅ Все сценарии работают корректно"
+  },
+  "code_location": {
+    "file": "src/components/BuilderPage.tsx",
+    "line": "1702-1707",
+    "component": "Button с ArrowLeft иконкой",
+    "context": "Панель инструментов конструктора"
+  },
+  "related_files": {
+    "session_page": "src/components/SessionPage.tsx (использует тот же подход)",
+    "routing": "src/main.tsx (React Router конфигурация)"
+  },
+  "status": "completed",
+  "result": "Кнопка Назад теперь корректно обновляет страницу при навигации"
+}

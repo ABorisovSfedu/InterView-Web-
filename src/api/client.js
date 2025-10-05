@@ -204,6 +204,15 @@ class ApiClient {
     return this.get(`/sessions/${sessionId}/files`);
   }
 
+  // Layout сохранение и загрузка
+  async saveLayout(sessionId, layoutData) {
+    return this.post(`/sessions/${sessionId}/layout`, layoutData);
+  }
+
+  async loadLayout(sessionId) {
+    return this.get(`/sessions/${sessionId}/layout`);
+  }
+
   // Проверка здоровья сервера
   async healthCheck() {
     return this.get('/health');

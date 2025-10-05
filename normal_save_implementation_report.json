@@ -1,0 +1,187 @@
+{
+  "title": "Реализовано нормальное сохранение макетов",
+  "date": "2025-01-15",
+  "feature": "Полноценное сохранение и загрузка layout в базу данных",
+  "description": "Реализована система сохранения макетов в базу данных с автоматическим восстановлением при перезагрузке страницы",
+  "implementation": {
+    "frontend": {
+      "api_client": {
+        "file": "src/api/client.js",
+        "methods": [
+          "saveLayout(sessionId, layoutData)",
+          "loadLayout(sessionId)"
+        ]
+      },
+      "builder_page": {
+        "file": "src/components/BuilderPage.tsx",
+        "features": [
+          "Автоматическая загрузка layout при инициализации",
+          "Сохранение в БД + localStorage как резерв",
+          "Автосохранение с debounce (2 сек)",
+          "Индикатор состояния сохранения",
+          "Обработка ошибок"
+        ]
+      }
+    },
+    "backend": {
+      "routes": {
+        "file": "server/routes/sessions.js",
+        "endpoints": [
+          "POST /:sessionId/layout - сохранение layout",
+          "GET /:sessionId/layout - загрузка layout"
+        ]
+      },
+      "database": {
+        "file": "server/scripts/init-db.js",
+        "table": "session_layouts",
+        "fields": [
+          "id (PRIMARY KEY)",
+          "session_id (UNIQUE, FOREIGN KEY)",
+          "elements (TEXT JSON)",
+          "timestamp",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    }
+  },
+  "technical_details": {
+    "database_schema": {
+      "table_name": "session_layouts",
+      "structure": {
+        "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+        "session_id": "INTEGER NOT NULL UNIQUE",
+        "elements": "TEXT NOT NULL (JSON)",
+        "timestamp": "TEXT NOT NULL",
+        "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "DATETIME DEFAULT CURRENT_TIMESTAMP"
+      },
+      "constraints": [
+        "FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE",
+        "UNIQUE constraint на session_id"
+      ],
+      "indexes": [
+        "idx_session_layouts_session_id ON session_layouts(session_id)"
+      ]
+    },
+    "api_endpoints": {
+      "save_layout": {
+        "method": "POST",
+        "path": "/api/sessions/:sessionId/layout",
+        "auth": "authenticateToken",
+        "validation": "elements array required",
+        "logic": "UPSERT (update if exists, insert if new)"
+      },
+      "load_layout": {
+        "method": "GET", 
+        "path": "/api/sessions/:sessionId/layout",
+        "auth": "authenticateToken",
+        "response": "layout data with elements"
+      }
+    },
+    "frontend_logic": {
+      "initialization": {
+        "priority": "1. Database → 2. localStorage fallback",
+        "useEffect": "loadSavedLayout() on sessionId change"
+      },
+      "auto_save": {
+        "mechanism": "debounced save with 2 second delay",
+        "trigger": "elements array changes",
+        "fallback": "localStorage backup"
+      },
+      "manual_save": {
+        "button": "Сохранить with loading state",
+        "feedback": "Success/error alerts"
+      }
+    }
+  },
+  "user_experience": {
+    "workflow": [
+      "1. Пользователь открывает BuilderPage",
+      "2. Автоматически загружается сохраненный layout",
+      "3. При изменениях - автосохранение через 2 сек",
+      "4. Ручное сохранение через кнопку",
+      "5. При перезагрузке - layout восстанавливается"
+    ],
+    "benefits": [
+      "Сохранение работает при перезагрузке",
+      "Автоматическое сохранение изменений",
+      "Резервная копия в localStorage",
+      "Индикатор состояния сохранения",
+      "Обработка ошибок с уведомлениями"
+    ]
+  },
+  "data_flow": {
+    "save_process": [
+      "1. User changes elements → setElements()",
+      "2. useEffect triggers debouncedSave()",
+      "3. API call: POST /sessions/:id/layout",
+      "4. Database UPSERT operation",
+      "5. localStorage backup",
+      "6. Console log confirmation"
+    ],
+    "load_process": [
+      "1. Component mounts with sessionId",
+      "2. useEffect calls loadSavedLayout()",
+      "3. API call: GET /sessions/:id/layout",
+      "4. If found: setElements(data.elements)",
+      "5. If not found: try localStorage fallback",
+      "6. If localStorage: parse and setElements()"
+    ]
+  },
+  "error_handling": {
+    "database_errors": {
+      "404": "Layout not found → try localStorage",
+      "403": "Access denied → show error",
+      "500": "Server error → show error message"
+    },
+    "frontend_errors": {
+      "network": "Try localStorage fallback",
+      "parse": "Show error alert",
+      "validation": "Show validation error"
+    },
+    "user_feedback": {
+      "success": "Alert: 'Макет успешно сохранен!'",
+      "error": "Alert: 'Ошибка при сохранении макета: {error.message}'",
+      "loading": "Button text: 'Сохранение...' + disabled state"
+    }
+  },
+  "performance_optimizations": {
+    "debouncing": "2 second delay prevents excessive API calls",
+    "indexing": "Database index on session_id for fast lookups",
+    "fallback": "localStorage prevents data loss on network issues",
+    "caching": "Elements stored in component state"
+  },
+  "security_features": {
+    "authentication": "All endpoints require valid JWT token",
+    "authorization": "User must have access to session",
+    "validation": "Elements must be valid array",
+    "sanitization": "JSON parsing with error handling"
+  },
+  "testing_scenarios": {
+    "happy_path": [
+      "1. Create session → generate layout → save → reload page → layout restored",
+      "2. Modify elements → auto-save → reload → changes preserved",
+      "3. Manual save → success message → data persisted"
+    ],
+    "error_cases": [
+      "1. Network error → localStorage fallback works",
+      "2. Invalid session → proper error message",
+      "3. Database error → user notification"
+    ]
+  },
+  "dependencies": {
+    "frontend": [
+      "lodash (debounce)",
+      "react (useState, useEffect, useCallback)",
+      "api client (existing)"
+    ],
+    "backend": [
+      "express (existing)",
+      "sqlite3 (existing)",
+      "authentication middleware (existing)"
+    ]
+  },
+  "status": "completed",
+  "result": "Нормальное сохранение макетов полностью реализовано и готово к использованию"
+}
